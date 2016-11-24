@@ -1,14 +1,14 @@
 /**
   ******************************************************************************
-  * @file    Template/stm32f4xx_it.h 
+  * @file    Project/STM32F4xx_StdPeriph_Templates/stm32f4xx_it.h 
   * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    20-September-2013
+  * @version V1.7.1
+  * @date    20-May-2016
   * @brief   This file contains the headers of the interrupt handlers.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2013 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
+
 void NMI_Handler(void);
 void HardFault_Handler(void);
 void MemManage_Handler(void);

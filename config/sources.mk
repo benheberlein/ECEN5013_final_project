@@ -1,8 +1,16 @@
 # Sources
 SRCS := main.c \
+		log.c \
+		\
         system_stm32f4xx.c \
         startup_stm32f429_439xx.s \
-        stm32f4xx_it.c
+        stm32f4xx_it.c \
+		\
+		misc.c \
+		stm32f4xx_usart.c \
+		stm32f4xx_rcc.c \
+		stm32f4xx_gpio.c \
+		stm32f4xx_exti.c 
 
 # Object files
 OBJS := $(SRCS:.c=.o)
@@ -12,12 +20,12 @@ OBJS := $(OBJS:.s=.o)
 ASMS := $(SRCS:.c=.s)
 
 # Search path for source files
-VPATH = src:src/int_drv:src/ext_drv:src/startup
+VPATH = src:src/drivers:src/project:src/startup
 
 # Include directory
 INC_DIR := inc \
-           inc/ext_drv \
-           inc/inc_drv \
+           inc/project \
+           inc/drivers \
            inc/startup
 
 # Config directory
