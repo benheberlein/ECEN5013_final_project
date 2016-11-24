@@ -331,22 +331,28 @@ def serial_print_log(l):
         if l[2] != 0:
             string += "\t'"
             substring = ""
-            for char in l[3:3+l[3]]:
+            for char in l[3:3+l[2]]:
                 substring += chr(char)
             string += substring + "'"
 
-        if l[l[2]+3] != 0:
-            string += "\n\tSent with data packet:\n\t"
+        data_size = l[l[2]+3] + l[l[2]+4] << 8 + l[l[2]+5] << 16 + l[l[2]+6] << 24
+
+        if data_size != 0:
+            string += "\nSent with data packet:\n\t"
             substring = ""
-            for char in l[l[2]+3:l[2]+4+l[l[1]+3]]:
-                substring += hex(char) + " "
+            i = 0
+            for char in l[l[2]+7:l[2]+7+data_size]:
+                i += 1
+                substring += "0x{:02x}".format(char) + " "
+                if i % 8 == 0:
+                    substring += "\n\t"
             string += substring
 
     else:
         print_error("Recieved log with invalid module ID: " + str(l[0]))
 
     if l[1] >= INFO and l[1] < WARN:
-        print_warning(string)
+        print_info(string)
     elif l[1] >= WARN and l[1] < ERR:
         print_warning(string)
     else:

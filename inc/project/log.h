@@ -25,7 +25,8 @@
  */
 typedef enum log_module_e {
     LOG,
-    CMD
+    CMD,
+    STDLIB
 } log_module_t;
 
 /** @brief Type for log packets
@@ -68,6 +69,22 @@ log_status_t log_log2(log_module_t module, gen_status_t status);
  *  @return return code with type log_status_t
  */
 log_status_t log_log3(log_module_t module, gen_status_t status, char *msg);
+
+/** @brief Log with four parameters.
+ *
+ *  This function takes in a module code, a status code
+ *  associated with the module, a data length, and a  
+ *  pointer to a data buffer.. The function then logs the 
+ *  data to the serial terminal.
+ *
+ *  @param module of the type log_module_t
+ *  @param status code to log
+ *  @param len optional data length paramter
+ *  @param data optional pointer to data bufffer
+ *  @return return code with type log_status_t
+ */
+log_status_t log_log4(log_module_t module, gen_status_t status, uint32_t len, uint8_t *data);
+
 
 /** @brief Log with five parameters.
  *

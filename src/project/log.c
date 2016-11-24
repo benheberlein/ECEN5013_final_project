@@ -37,6 +37,10 @@ log_status_t log_log3(log_module_t module, gen_status_t status, char *msg) {
     return log_log5(module, status, msg, 0, NULL);
 }
 
+log_status_t log_log4(log_module_t module, gen_status_t status, uint32_t len, uint8_t *data) {
+    return log_log5(module, status, NULL, len, data);
+}
+
 log_status_t log_log5(log_module_t module, gen_status_t status, char *msg, uint32_t len, uint8_t *data) {
   
     // Check for data size  
