@@ -11,42 +11,73 @@ import colorama
 import atexit
 import time
 import signal
+import struct
 
 # Module definitions
 # KEEP IN SYNC WITH C CODE
-modules = { 
+log_modules = { 
     0: 'LOG',
     1: 'CMD',
     2: 'STDLIB'
+}
+
+# reversed for easier sending
+cmd_modules = {
+    'LOG': 0,
+    'CMD': 1,
+    'STDLIB': 2
 }
 
 # Error definitions
 # KEEP IN SYNC WITH C CODE
 INFO = 0
 WARN = 20
-ERR = 40
-END = 60
+ERR  = 40
+END  = 60
 
 log_status = {
     'LOG': {
-        INFO:  'LOG_INFO_OK',
-        WARN:  'LOG_WARN_UNKNOWN',
-        ERR:   'LOG_ERR_DATASIZE',
-        ERR+1: 'LOG_ERR_MSGSIZE',
-        END-1: 'LOG_ERR_UNKNOWN' 
+        INFO:   'LOG_INFO_OK',
+        WARN-1: 'LOG_INFO_UNKNOWN',
+        ERR-1:  'LOG_WARN_UNKNOWN',
+        ERR:    'LOG_ERR_DATASIZE',
+        ERR+1:  'LOG_ERR_MSGSIZE',
+        END-1:  'LOG_ERR_UNKNOWN' 
     },
     'CMD': {
-        INFO:  'CMD_INFO_OK',
-        END-1: 'CMD_ERR_UNKNOWN'
+        INFO:   'CMD_INFO_OK',
+        INFO+1: 'CMD_INFO_INTERRUPT',
+        WARN-1: 'CMD_INFO_UNKNOWN',
+        WARN:   'CMD_WARN_FREE', 
+        ERR-1:  'CMD_WARN_UNKNOWN',
+        ERR:    'CMD_ERR_QUEUEEMPTY',
+        ERR+1:  'CMD_ERR_QUEUEFULL',
+        ERR+2:  'CMD_ERR_QUEUEINVALID',
+        ERR+3:  'CMD_ERR_MALLOC',
+        END-1:  'CMD_ERR_UNKNOWN'
     },
     'STDLIB': {
-        INFO:  'STDLIB_INFO_OK',
-        END-1: 'STDLIB_ERR_UNKNOWN'
+        INFO:   'STDLIB_INFO_OK',
+        WARN-1: 'STDLIB_INFO_UNKNOWN',
+        ERR-1:  'STDLIB_WARN_UNKNOWN',
+        END-1:  'STDLIB_ERR_UNKNOWN'
+    }
+}
+
+cmd_functions = {
+    'LOG': {
+        'LOG_FUNC_INIT': 0, 
+    },
+    'CMD': {
+        'CMD_FUNC_INIT': 0,
+    },
+    'STDLIB': {
+        'STD_FUNC_DUMMY': 0,
     }
 }
 
 # Serial port Baud rate
-BAUD_RATE = 28800 
+BAUD_RATE = 115200 
 
 # Serial port
 ser = serial.Serial()
@@ -62,6 +93,9 @@ serial_msg_size = 0
 serial_list = []
 serial_timeout = 1.0
 serial_start_time = 0
+
+# Serial flag to block on transmit
+serial_tx = False
 
 # User Input
 q_input = queue.Queue()
@@ -217,8 +251,10 @@ def proc_stlink():
 
 def proc_read_serial():
     global ser
+    global serial_tx
     while True:
-        q_serial.put(ser.read())
+        if serial_tx == False:
+            q_serial.put(ser.read())
 
 def proc_read_input():
     while True:
@@ -236,28 +272,70 @@ def proc_read_input():
 
 #######################################
 # Input command section
+def cmd_send(module, function, data_len, data):
+    if module in cmd_modules:
+        m = cmd_modules[module]
+    else:
+        print_error("Module not in list of modules.")
+        return
+
+    if function in cmd_functions[module]:
+        f = cmd_functions[module][function]
+    else:
+        print_error("Function not in list of module functions.")
+        return
+
+    m = bytes(struct.pack("<B", m))
+    f = bytes(struct.pack("<B", f))
+    d = bytes(struct.pack('<Q', data)[0:data_len])
+    dl = bytes(struct.pack('<H', data_len))
+
+    global serial_tx
+    serial_tx = True
+
+    print(m)
+    ser.write(m)
+    time.sleep(0.001)
+    print(f)
+    ser.write(f)
+    time.sleep(0.001)
+    print(dl)
+    ser.write(dl)
+    time.sleep(0.001)
+    if not data_len == 0:
+        print(d)
+        ser.write(d)
+
+    serial_tx = False
+
 def cmd_parse_input(cmd):
     cmd = cmd.lower()
     if cmd == "help":
         cmd_help()
-    elif cmd == "stlink-restart":
+    elif cmd == "stlink restart":
         cmd_stlink_restart()
-    elif cmd == "debug-start":
+    elif cmd == "debug start":
         cmd_debug_start()
-    elif cmd == "debug-stop":
+    elif cmd == "debug stop":
         cmd_debug_stop()
-    elif cmd == "debug-restart":
+    elif cmd == "debug restart":
         cmd_debug_restart()
+    elif cmd == "log init":
+        cmd_send("LOG", "LOG_FUNC_INIT", 0, 0)
+    elif cmd == "cmd init":
+        cmd_send("CMD", "CMD_FUNC_INIT", 5, 0x5A4B3C2D1E)
     else:
         print_warning("Invalid command. Type 'help' to view a list of commands")
 
 def cmd_help():
     print_info("The following commands are available:\n" + 
-          "\thelp:\t\tdisplay the help text\n" + 
-          "\tstlink-restart:\trestart the STLINK connection\n" + 
-          "\tdebug-start:\tstart a debug session\n" +
-          "\tdebug-stop:\tstop a debug session\n" +
-          "\tdebug-restart\trestart a debug session")
+          "\thelp:\t\t\tdisplay the help text\n" + 
+          "\tstlink\trestart:\trestart the STLINK connection\n" + 
+          "\tdebug\tstart:\t\tstart a debug session\n" +
+          "\t\tstop:\t\tstop a debug session\n" +
+          "\t\trestart:\trestart a debug session\n" +
+          "\tlog\tinit:\t\tinitialize the logger module\n" +
+          "\tcmd\tinit:\t\tinitialize the command module")
 
 def cmd_stlink_restart():
     global p
@@ -266,6 +344,7 @@ def cmd_stlink_restart():
     p.wait()
     tp = threading.Thread(target=proc_stlink)
     tp.daemon = True
+    time.sleep(0.5)
     tp.start()
 
 def cmd_debug_start():
@@ -321,12 +400,16 @@ def serial_reset():
 def serial_print_log(l):
     serial_reset()
     string = ""
-    if l[0] in modules:
-        string += modules[l[0]] + ": "
-        if l[1] in log_status[modules[l[0]]]:
-            string += log_status[modules[l[0]]][l[1]]
-        else: 
-            string += log_status[modules[l[0]]][END-1]
+    if l[0] in log_modules:
+        string += log_modules[l[0]] + ": "
+        if l[1] in log_status[log_modules[l[0]]]:
+            string += log_status[log_modules[l[0]]][l[1]]
+        elif l[1] >= INFO and l[1] < WARN:
+            sring += log_status[log_modules[l[0]]][WARN-1]
+        elif l[1] >= WARN and l[1] < ERR:
+            string += log_status[log_modules[l[0]]][ERR-1]
+        else:
+            string += log_status[log_modules[l[0]]][END-1]
 
         if l[2] != 0:
             string += "\t'"

@@ -1,0 +1,26 @@
+/** @file mod.h
+ *  @brief Module definitions.
+ *
+ *  This file defines a module enumeration for use with
+ *  the logger and the command modules. 
+ *
+ *  @author Ben Heberlein
+ *  @bug No known bugs.
+ */
+
+#ifndef __MOD_H
+#define __MOD_H
+
+/*************************************
+ * Includes and definitions
+ */
+
+/** @brief Enumeration of module types. 
+ */
+typedef enum mod_e {
+    LOG,
+    CMD,
+    STDLIB
+} mod_t;
+
+# endif /* __MOD_H */

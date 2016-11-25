@@ -29,6 +29,7 @@
 #define WARN 20
 #define ERR  40
 #define END  60
+
 /* @brief General status type for module status typecast.
  */
 typedef uint8_t gen_status_t;
@@ -37,7 +38,10 @@ typedef uint8_t gen_status_t;
  */
 typedef enum log_status_e {
     LOG_INFO_OK = INFO,
-    LOG_WARN_UNKNOWN = WARN,
+    LOG_INFO_UNKNOWN = WARN-1,
+
+    LOG_WARN_UNKNOWN = ERR-1,
+    
     LOG_ERR_DATASIZE = ERR,
     LOG_ERR_MSGSIZE = ERR+1,
     LOG_ERR_UNKNOWN = END-1
@@ -47,15 +51,32 @@ typedef enum log_status_e {
  */
 typedef enum cmd_status_e {
     CMD_INFO_OK = INFO,
-    CMD_ERR_UNKNOWN = END,
-    //...
+    CMD_INFO_INTERRUPT = INFO+1,
+    CMD_INFO_QUEUEEMPTY = INFO+2,
+    CMD_INFO_QUEUEFULL = INFO+3,
+    CMD_INFO_QUEUEPARTIAL = INFO+4,
+    CMD_INFO_UNKNOWN = WARN-1,
+
+    CMD_WARN_FREE = WARN,
+    CMD_WARN_UNKNOWN = ERR-1,
+
+    CMD_ERR_QUEUEEMPTY = ERR,
+    CMD_ERR_QUEUEFULL = ERR+1,
+    CMD_ERR_QUEUEINVALID = ERR+2,
+    CMD_ERR_MALLOC = ERR+3,
+    CMD_ERR_NULLPTR = ERR+4,
+    CMD_ERR_UNKNOWN = END-1,
 } cmd_status_t;
 
 /* @brief STDLIB status
  */
 typedef enum stdlib_status_e {
     STDLIB_INFO_OK = INFO,
-    STDLIB_ERR_UNKNOWN = END,
+    STDLIB_INFO_UNKNOWN = WARN-1,
+
+    STDLIB_WARN_UNKNOWN = ERR-1,
+
+    STDLIB_ERR_UNKNOWN = END-1,
 } stdlib_status_e;
 
 /**************************************
@@ -74,11 +95,9 @@ typedef enum stdlib_status_e {
  * @retval None
  */
 void assert_failed(uint8_t* file, uint32_t line) { 
-    /* User can add his own implementation to report the file name and line number,
-     * ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+    
+    log_Log(STDLIB, STDLIB_ERR_UNKNOWN, file, 4, &line);
 
-    /* Infinite loop */
-    while (1) {}
 }
 #endif
 

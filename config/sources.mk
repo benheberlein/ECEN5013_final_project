@@ -1,16 +1,24 @@
 # Sources
 SRCS := main.c \
 		log.c \
+        cmd.c \
 		\
         system_stm32f4xx.c \
         startup_stm32f429_439xx.s \
         stm32f4xx_it.c \
 		\
 		misc.c \
-		stm32f4xx_usart.c \
 		stm32f4xx_rcc.c \
 		stm32f4xx_gpio.c \
 		stm32f4xx_exti.c 
+
+ifneq ($(LOG),NONE)
+  SRCS += stm32f4xx_usart.c
+else
+  ifeq ($(CMD),TRUE)
+    SRCS += stm32f4xx_usart.c
+  endif	
+endif
 
 # Object files
 OBJS := $(SRCS:.c=.o)

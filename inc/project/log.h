@@ -18,43 +18,39 @@
  * @name Includes and definitions
  */
 
+#ifdef __LOG
 #include <stdint.h>
-#include <err.h>
-
-/** @brief Enumeration of module types. 
- */
-typedef enum log_module_e {
-    LOG,
-    CMD,
-    STDLIB
-} log_module_t;
+#include "err.h"
+#include "mod.h"
 
 /** @brief Type for log packets
  */
-typedef struct __attribute__ ((packed)) log_packet_e {
-    uint8_t log_mod;
-    uint8_t log_status;
-    uint8_t log_msglen;
-    uint8_t *log_msg;
-    uint32_t log_datalen;
-    uint8_t *log_data;
+typedef struct __attribute__ ((packed)) log_packet_s {
+    uint8_t log_packet_mod;
+    uint8_t log_packet_status;
+    uint8_t log_packet_msgLen;
+    uint8_t *log_packet_msg;
+    uint32_t log_packet_dataLen;
+    uint8_t *log_packet_data;
 } log_packet_t;
+#endif
 
 /**************************************
  * @name Private functions
  */
 
+#ifdef __LOG
 /** @brief Log with two parameters.
  *
  *  This function takes in a module code and a status code
  *  associated with the module. The function then logs the 
  *  data to the serial terminal.
  *
- *  @param module of the type log_module_t
+ *  @param module of the type mod_t
  *  @param status code to log
  *  @return return code with type log_status_t
  */
-log_status_t log_log2(log_module_t module, gen_status_t status);
+log_status_t log_log2(mod_t module, gen_status_t status);
 
 /** @brief Log with three parameters.
  *
@@ -63,12 +59,12 @@ log_status_t log_log2(log_module_t module, gen_status_t status);
  *  uint8_t pointer with a null terminated string. The
  *  function then logs the data to the serial terminal.
  *
- *  @param module of the type log_module_t
+ *  @param module of the type mod_t
  *  @param status code to log
  *  @param msg message as a pointer to uint8_t
  *  @return return code with type log_status_t
  */
-log_status_t log_log3(log_module_t module, gen_status_t status, char *msg);
+log_status_t log_log3(mod_t module, gen_status_t status, char *msg);
 
 /** @brief Log with four parameters.
  *
@@ -77,14 +73,13 @@ log_status_t log_log3(log_module_t module, gen_status_t status, char *msg);
  *  pointer to a data buffer.. The function then logs the 
  *  data to the serial terminal.
  *
- *  @param module of the type log_module_t
+ *  @param module of the type mod_t
  *  @param status code to log
  *  @param len optional data length paramter
  *  @param data optional pointer to data bufffer
  *  @return return code with type log_status_t
  */
-log_status_t log_log4(log_module_t module, gen_status_t status, uint32_t len, uint8_t *data);
-
+log_status_t log_log4(mod_t module, gen_status_t status, uint32_t len, uint8_t *data);
 
 /** @brief Log with five parameters.
  *
@@ -94,14 +89,14 @@ log_status_t log_log4(log_module_t module, gen_status_t status, uint32_t len, ui
  *  and a pointer to a data buffer.. The function then 
  *  logs the data to the serial terminal.
  *
- *  @param module of the type log_module_t
+ *  @param module of the type mod_t
  *  @param status code to log
  *  @param msg message as a pointer to uint8_t
  *  @param len optional data length paramter
  *  @param data optional pointer to data bufffer
  *  @return return code with type log_status_t
  */
-log_status_t log_log5(log_module_t module, gen_status_t status, char *msg, uint32_t len, uint8_t *data);
+log_status_t log_log5(mod_t module, gen_status_t status, char *msg, uint32_t len, uint8_t *data);
 
 /** @brief Log send command.
  *
@@ -112,11 +107,13 @@ log_status_t log_log5(log_module_t module, gen_status_t status, char *msg, uint3
  *  @return return code with type log_status_t
  */
 log_status_t log_send(log_packet_t *log_packet);
+#endif
 
 /**************************************
  * @name Public functions
  */
 
+#ifdef __LOG
 /** @breif The log initialization function
  *
  *  This function should be called before using any log
@@ -132,8 +129,8 @@ log_status_t log_Init();
  *  This function can take several forms.Depending on the 
  *  number of input parameters to the function and the type
  *  of message (warning, error, info, etc), this macro will
- *  call one of several sub-functions. Calling log with 0,
- *  1, or 4 arguments should generate a compile time or 
+ *  call one of several sub-functions. Calling log with 0
+ *  or 1 arguments should generate a compile time or 
  *  linker error.
  *
  *  The second parameter can be called with any value from
@@ -142,7 +139,7 @@ log_status_t log_Init();
  *
  *  The macro function is declared as log_Log()
  *
- *  @param module of the type log_module_t
+ *  @param module of the type mod_t
  *  @param status code to log
  *  @param msg message as a pointer to uint8_t
  *  @param len optional data length paramter
@@ -151,5 +148,9 @@ log_status_t log_Init();
  */
 #define LOG_SELECT(_1,_2,_3,_4,_5,LOG_NAME,...) LOG_NAME
 #define log_Log(...) LOG_SELECT(__VA_ARGS__,log_log5,log_log4,log_log3,log_log2,log_log1,log_log0)(__VA_ARGS__)
+
+#else
+#define log_Log(...) 
+#endif
 
 # endif /* __LOG_H */

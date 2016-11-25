@@ -1,10 +1,4 @@
-# INCLUDES
-# ----------------
-
-include config/sources.mk
-include config/tools.mk
-
-# OPTIONS
+#OPTIONS
 # -----------------
 
 # Debug mode
@@ -44,14 +38,14 @@ else
     DEBUG_FLAGS = -g
 
 
-    ifneq ($(LOG), NONE) 
+    ifneq ($(LOG),NONE) 
       ifeq ($(LOG),INFO)
         COMP_FLAGS += __LOG __INFO
       else
         ifeq ($(LOG),WARN)
           COMP_FLAGS += __LOG __WARN
         else
-          ifeq ($(LOG), ERR)
+          ifeq ($(LOG),ERR)
             COMP_FLAGS += __LOG __ERR
           else 
             $(error Bad value for LOG)
@@ -94,6 +88,16 @@ else
   $(error Bad value for WIFI)
 endif
 
+# INCLUDES
+# ----------------
+
+include config/sources.mk
+include config/tools.mk
+
+# CONSTRUCTION
+# -----------------
+
+# Final CFLAGS with sources
 CFLAGS  = $(DEBUG_FLAGS) --std=c99 -Wall -T$(LINKER_FILE)
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -specs=nosys.specs
