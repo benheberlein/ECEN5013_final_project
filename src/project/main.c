@@ -30,24 +30,28 @@
 
 int main() {
 
-#ifdef __LOG
-    // Initalize logger and abort if there is an issue
-    if (log_Init() != LOG_INFO_OK) {
+    #ifdef __LOG  
+    if (log_Init() == LOG_INFO_OK) {
+        log_Log(LOG, LOG_INFO_OK, "Initialized logger.\0");
+    } else {
         return -1;
     }
-    log_Log(LOG, LOG_INFO_OK, "Initialized logger.\0");
-#endif
+    #endif
 
-    // Initialize cmd module and abort if there's an issue
-    if (cmd_Init() != CMD_INFO_OK) {
+    if (cmd_Init() == CMD_INFO_OK) {
+        log_Log(CMD, CMD_INFO_OK, "Initialized command module.\0");
+    } else {
         return -2;
     }
-    log_Log(CMD, CMD_INFO_OK, "Initiialized command module.\0");
 
-
-    while(1) {
+    // Start main loop
+    cmd_status_t st = cmd_Loop();
+    if (st != CMD_INFO_OK) {
+        log_Log(CMD, st, "Exiting main.\0");
+        return -3;
     }
 
+    return 0;
 }
 
 

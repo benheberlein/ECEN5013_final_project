@@ -40,6 +40,7 @@ typedef enum log_status_e {
     LOG_INFO_OK = INFO,
     LOG_INFO_UNKNOWN = WARN-1,
 
+    LOG_WARN_ALINIT = WARN,
     LOG_WARN_UNKNOWN = ERR-1,
     
     LOG_ERR_DATASIZE = ERR,
@@ -58,6 +59,7 @@ typedef enum cmd_status_e {
     CMD_INFO_UNKNOWN = WARN-1,
 
     CMD_WARN_FREE = WARN,
+    CMD_WARN_ALINIT = WARN+1,
     CMD_WARN_UNKNOWN = ERR-1,
 
     CMD_ERR_QUEUEEMPTY = ERR,
@@ -65,6 +67,8 @@ typedef enum cmd_status_e {
     CMD_ERR_QUEUEINVALID = ERR+2,
     CMD_ERR_MALLOC = ERR+3,
     CMD_ERR_NULLPTR = ERR+4,
+    CMD_ERR_DATA = ERR+5,
+    CMD_ERR_NOFUNC = ERR+6,
     CMD_ERR_UNKNOWN = END-1,
 } cmd_status_t;
 

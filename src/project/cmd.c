@@ -27,10 +27,14 @@
  */
 static cmd_queue_t *cmd_queue;
 
+/* @brief initialize flag
+ */
+static uint8_t cmd_initialized;
+
 #ifdef __CMD
 /* @brief UART2 Rx cmd buffer
  */
-static cmd_cmd_t *cmd_uartBuf;
+static cmd_cmd_t *cmd_uartBuf = 0;
 
 /* @brief UART2 Rx counter
  */
@@ -81,19 +85,23 @@ cmd_status_t cmd_queueInit() {
     cmd_queue->cmd_queue_size = 0;
     cmd_queue->cmd_queue_status = CMD_QUEUE_EMPTY;
 
+    #ifndef __CMD
+    cmd_initialized = 1;
+    #endif
+
     return CMD_INFO_OK;
 }
 
 #ifdef __CMD
 cmd_status_t cmd_uartInit() {
 
-    // Initialize command buffer
+   // Initialize command buffer
     cmd_uartBuf = NULL;
     cmd_uartBuf = (cmd_cmd_t *) malloc(sizeof(cmd_cmd_t));
     
     // Check for failure
     if (cmd_uartBuf == NULL) {
-        log_Log(CMD, CMD_ERR_MALLOC, "Couldn't initialize cmd_uartBuf memory\0");
+        log_Log(CMD, CMD_ERR_MALLOC, "Couldn't initialize UART command buffer memory\0");
         return CMD_ERR_MALLOC;
     }
 
@@ -151,6 +159,8 @@ cmd_status_t cmd_uartInit() {
     // Enable USART2
     USART_Cmd(USART2, ENABLE);
     
+    cmd_initialized = 1;
+
     return CMD_INFO_OK;
 
 }
@@ -229,12 +239,12 @@ void USART2_IRQHandler(void) {
 cmd_status_t cmd_CmdDeallocate(cmd_cmd_t *cmd) {
     // Check for null issues
     if (cmd == NULL) {
-        log_Log(CMD, CMD_WARN_FREE, "Attempting to free memory that has already been freed.\0");
+        log_Log(CMD, CMD_WARN_FREE, "Attempting to free command that has already been freed.\0");
         return CMD_WARN_FREE;
     }
     if (cmd->cmd_data == NULL) {
         free(cmd);
-        log_Log(CMD, CMD_WARN_FREE, "Attempting to free memory that has already been freed.\0");
+        // We don't log a warning here because this is expected on commands with no data
         return CMD_WARN_FREE;
     }
     
@@ -261,10 +271,12 @@ cmd_status_t cmd_CmdAllocate(cmd_cmd_t **cmd, uint16_t dataLen) {
 
     // Allocate data in struct
     (*cmd)->cmd_data = NULL;
-    (*cmd)->cmd_data = (uint8_t *) malloc(dataLen);
-    if ((*cmd)->cmd_data == NULL) {
-        log_Log(CMD, CMD_ERR_MALLOC, "Could not allocate command data.\0");
-        return CMD_ERR_MALLOC;
+    if (dataLen != 0) {
+        (*cmd)->cmd_data = (uint8_t *) malloc(dataLen);
+        if ((*cmd)->cmd_data == NULL) {
+            log_Log(CMD, CMD_ERR_MALLOC, "Could not allocate command data.\0");
+            return CMD_ERR_MALLOC;
+        }
     }
 
     // Set to defaults
@@ -336,6 +348,9 @@ cmd_status_t cmd_QueueGet(cmd_cmd_t **cmd) {
         return CMD_ERR_QUEUEEMPTY;
     }
 
+    // Set command
+    *cmd = *cmd_queue->cmd_queue_tail;
+
     // Increment tail and check for wrap
     cmd_queue->cmd_queue_tail++;
     if ((cmd_queue->cmd_queue_tail - cmd_queue->cmd_queue_buf) >=
@@ -356,6 +371,11 @@ cmd_status_t cmd_QueueGet(cmd_cmd_t **cmd) {
 }
 
 cmd_status_t cmd_Init() {
+    // Check initialization flag
+    if (cmd_initialized == 1) {
+        return CMD_WARN_ALINIT;
+    }
+
 #ifdef __CMD
     cmd_status_t ret = cmd_queueInit();
     if (ret != CMD_INFO_OK) {
@@ -365,5 +385,86 @@ cmd_status_t cmd_Init() {
 #else 
     return cmd_queueInit();
 #endif
+
+}
+
+cmd_status_t cmd_Loop() {
+    cmd_cmd_t *cmd;
+    cmd_status_t st;
+    while(1) {
+        // Spin on empty queue
+        while (cmd_QueueGetStatus() == CMD_INFO_QUEUEEMPTY) {}
+        if (cmd_QueueGetStatus() == CMD_ERR_QUEUEINVALID) {
+            log_Log(CMD, CMD_ERR_QUEUEINVALID, "Command Queue entered invalid state.\0");
+            return CMD_ERR_QUEUEINVALID;
+        } 
+
+        // Get function
+        cmd_QueueGet(&cmd);
+
+        // Route function request
+        switch (cmd->cmd_module) {
+        case LOG:
+            switch (cmd->cmd_func) {
+                #ifdef __LOG
+                case LOG_FUNC_INIT:
+                    if (cmd->cmd_data != 0) {
+                        log_Log(CMD, CMD_ERR_DATA, "Initalization command should not have data.\0");
+                    }
+                    log_status_t log_st = log_Init();
+                    if (log_st == LOG_INFO_OK) {
+                        log_Log(LOG, LOG_INFO_OK, "Initialized Logger.\0");
+                    } else if (log_st == LOG_WARN_ALINIT){
+                        log_Log(LOG, LOG_WARN_ALINIT, "Logger is already initialized.\0");
+                    } else {                       
+                        log_Log(LOG, log_st, "Failed to initialize log.\0");
+                    }
+                    
+                    break;
+                #endif
+                default:
+                    log_Log(CMD, CMD_ERR_NOFUNC, "Tried to call a log function that doesn't exist.\0", 
+                            1, &(cmd->cmd_func));
+                    break;
+ 
+            }
+            break;
+        case CMD:
+            switch (cmd->cmd_func) {
+                case CMD_FUNC_INIT:
+                    if (cmd->cmd_data != 0) {
+                        log_Log(CMD, CMD_ERR_DATA, "Initialization command should not have data.\0");
+                    }
+                    cmd_status_t cmd_st = cmd_Init();
+                    if (cmd_st == CMD_INFO_OK) {
+                        log_Log(CMD, CMD_INFO_OK, "Initialized command module.\0");
+                    } else if (cmd_st == CMD_WARN_ALINIT) {
+                        log_Log(CMD, CMD_WARN_ALINIT, "Command module alredy initialized.\0");
+                    } else {
+                        log_Log(CMD, cmd_st, "Failed to initialize log");
+                    }                    
+                    break;
+                default:
+                    log_Log(CMD, CMD_ERR_NOFUNC, "Tried to call a log function that doesn't exist.\0", 
+                            1, &(cmd->cmd_func));
+                    break;
+            }
+            break;
+        case STDLIB:
+            switch (cmd->cmd_func) {
+                default:
+                    log_Log(CMD, CMD_ERR_NOFUNC, "Tried to call a stdlib function that doesn't exist.\0", 
+                            1, &(cmd->cmd_func));        
+                }
+                break;
+        }
+
+        // Free memory, pass warning about freeing freed memory
+        st = cmd_CmdDeallocate(cmd);
+        if (st != CMD_INFO_OK && st != CMD_WARN_FREE) {
+            log_Log(CMD, st);
+            return st;
+        }
+    }
 }
 

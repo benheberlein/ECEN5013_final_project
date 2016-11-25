@@ -205,4 +205,15 @@ cmd_status_t cmd_QueueGet(cmd_cmd_t **cmd);
  */
 cmd_status_t cmd_Init();
 
+/** @brief The main command loop
+ * 
+ *  This function checks the main command queue for pending
+ *  commands and executes them if there are any. It also 
+ *  calls cmd_Deallocate to free the memory associated with
+ *  commands.
+ *
+ *  @return a status value of the type cmd_status_t
+ */
+cmd_status_t cmd_Loop();
+
 # endif /* __CMD_H */

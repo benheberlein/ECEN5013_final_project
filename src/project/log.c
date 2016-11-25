@@ -24,9 +24,13 @@
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_gpio.h"
 
-#define LOG_MAXMSGSIZE 255
+#define LOG_MAXMSGSIZE 64
 #define LOG_MAXDATASIZE 16777216
 #define LOG_BAUDRATE 115200
+
+/* @brief Initialization flag for logger
+ */
+static uint8_t log_initialized = 0;
 
 #endif
 
@@ -36,7 +40,7 @@
 
 #ifdef __LOG
 log_status_t log_log2(mod_t module, gen_status_t status) {
-    return log_log5(module, status, NULL, 0, NULL);
+    return log_log5(module, status, "\0", 0, NULL);
 }
 
 log_status_t log_log3(mod_t module, gen_status_t status, char *msg) {
@@ -44,7 +48,7 @@ log_status_t log_log3(mod_t module, gen_status_t status, char *msg) {
 }
 
 log_status_t log_log4(mod_t module, gen_status_t status, uint32_t len, uint8_t *data) {
-    return log_log5(module, status, NULL, len, data);
+    return log_log5(module, status, "\0", len, data);
 }
 
 log_status_t log_log5(mod_t module, gen_status_t status, char *msg, uint32_t len, uint8_t *data) {
@@ -127,6 +131,10 @@ log_status_t log_send(log_packet_t *log_packet) {
 #ifdef __LOG
 log_status_t log_Init() {
 
+    if (log_initialized == 1) {
+        return LOG_WARN_ALINIT;
+    }
+
     GPIO_InitTypeDef GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
 
@@ -162,6 +170,8 @@ log_status_t log_Init() {
 
     // Enable USART
     USART_Cmd(USART2, ENABLE);
+
+    log_initialized = 1;
 
     return LOG_INFO_OK;
 }

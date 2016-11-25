@@ -39,6 +39,7 @@ log_status = {
     'LOG': {
         INFO:   'LOG_INFO_OK',
         WARN-1: 'LOG_INFO_UNKNOWN',
+        WARN:   'LOG_WARN_ALINIT',
         ERR-1:  'LOG_WARN_UNKNOWN',
         ERR:    'LOG_ERR_DATASIZE',
         ERR+1:  'LOG_ERR_MSGSIZE',
@@ -49,11 +50,15 @@ log_status = {
         INFO+1: 'CMD_INFO_INTERRUPT',
         WARN-1: 'CMD_INFO_UNKNOWN',
         WARN:   'CMD_WARN_FREE', 
+        WARN+1: 'CMD_WARN_ALINIT',
         ERR-1:  'CMD_WARN_UNKNOWN',
         ERR:    'CMD_ERR_QUEUEEMPTY',
         ERR+1:  'CMD_ERR_QUEUEFULL',
         ERR+2:  'CMD_ERR_QUEUEINVALID',
         ERR+3:  'CMD_ERR_MALLOC',
+        ERR+4:  'CMD_ERR_NULLPTR',
+        ERR+5:  'CMD_ERR_DATA',
+        ERR+6:  'CMD_ERR_NOFUNC',
         END-1:  'CMD_ERR_UNKNOWN'
     },
     'STDLIB': {
@@ -293,18 +298,17 @@ def cmd_send(module, function, data_len, data):
     global serial_tx
     serial_tx = True
 
-    print(m)
     ser.write(m)
     time.sleep(0.001)
-    print(f)
     ser.write(f)
     time.sleep(0.001)
-    print(dl)
     ser.write(dl)
     time.sleep(0.001)
     if not data_len == 0:
-        print(d)
         ser.write(d)
+
+    # give UART interrupt time to add command to queue
+    time.sleep(0.050)
 
     serial_tx = False
 
@@ -323,7 +327,7 @@ def cmd_parse_input(cmd):
     elif cmd == "log init":
         cmd_send("LOG", "LOG_FUNC_INIT", 0, 0)
     elif cmd == "cmd init":
-        cmd_send("CMD", "CMD_FUNC_INIT", 5, 0x5A4B3C2D1E)
+        cmd_send("CMD", "CMD_FUNC_INIT", 0, 0)
     else:
         print_warning("Invalid command. Type 'help' to view a list of commands")
 
@@ -412,11 +416,11 @@ def serial_print_log(l):
             string += log_status[log_modules[l[0]]][END-1]
 
         if l[2] != 0:
-            string += "\t'"
+            string += "\t"
             substring = ""
             for char in l[3:3+l[2]]:
                 substring += chr(char)
-            string += substring + "'"
+            string += substring
 
         data_size = l[l[2]+3] + l[l[2]+4] << 8 + l[l[2]+5] << 16 + l[l[2]+6] << 24
 
@@ -430,16 +434,17 @@ def serial_print_log(l):
                 if i % 8 == 0:
                     substring += "\n\t"
             string += substring
+        
+        if l[1] >= INFO and l[1] < WARN:
+            print_info(string)
+        elif l[1] >= WARN and l[1] < ERR:
+            print_warning(string)
+        else:
+            print_error(string)
 
     else:
         print_error("Recieved log with invalid module ID: " + str(l[0]))
-
-    if l[1] >= INFO and l[1] < WARN:
-        print_info(string)
-    elif l[1] >= WARN and l[1] < ERR:
-        print_warning(string)
-    else:
-        print_error(string)
+        print_error("Check that the previous call to logger terminated its message with a '\\0'");
 
 def serial_parse_log(data):
     if (not type(data) == bytes):
