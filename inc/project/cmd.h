@@ -46,6 +46,12 @@ typedef enum stdlib_func_e {
     STDLIB_FUNC_DUMMY,   
 } stdlib_func_t;
 
+/* @brief stdlib functions
+ */
+typedef enum sdram_func_e {
+    SDRAM_FUNC_INIT,   
+} sdram_func_t;
+
 /* @brief command structure
  */
 typedef struct __attribute__ ((packed)) cmd_cmd_s {

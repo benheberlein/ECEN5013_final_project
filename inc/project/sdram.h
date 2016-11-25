@@ -1,48 +1,43 @@
-/** @file template.h
- *  @brief Function prototypes for the template file.
+/** @file sdram.h
+ *  @brief Function prototypes for the SDRAM functions
  *
- *  This contains the prototypes, macros, constants,
- *  and global variables for the template file. 
+ *  This contains the prototypes for the SDRAM functions
+ *  based on compiler directives.
+ *
+ *  If __STM32F429I_DISCOVERY is defined, we use the 
+ *  implementation of the SDRAM interface from the
+ *  discovery board libraries.
  *
  *  @author Ben Heberlein
  *  @bug No known bugs.
  */
 
-#ifndef __TEMPLATE_H
-#define __TEMPLATE_H
+#ifndef __SDRAM_H
+#define __SDRAM_H
 
 /*************************************
- * @name Includes and definitions
+ * Includes and definitions
  */
 
 #include <stdint.h>
+#include "err.h"
 
 /**************************************
- * @name Private functions
+ * Private functions
  */
-
-/** @brief Short description of the function.
- *
- *  Long description of the function, and certain
- *  important use cases associated with the function.         
- *
- *  @param ch the input byte
- *  @return The return byte
- */
-uint8_t template_privateFunction(uint8_t ch);
 
 /**************************************
- * @name Public functions
+ * Public functions
  */
 
-/** @brief Short description of the function.
+/** @brief Initialize the SDRAM interface
  *
- *  Long description of the function, and certain
- *  important use cases associated with the function.         
+ *  This will initialize the SDRAM interface either
+ *  using the discovery board library or a custom
+ *  implementations         
  *
- *  @param ch the input byte
- *  @return The return byte
+ *  @return a status code of the type sdram_status_t
  */
-uint8_t template_PublicFunction(uint8_t ch);
+sdram_status_t sdram_Init();
 
 # endif /* __TEMPLATE_H */

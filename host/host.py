@@ -18,14 +18,16 @@ import struct
 log_modules = { 
     0: 'LOG',
     1: 'CMD',
-    2: 'STDLIB'
+    2: 'STDLIB',
+    3: 'SDRAM',
 }
 
 # reversed for easier sending
 cmd_modules = {
-    'LOG': 0,
-    'CMD': 1,
-    'STDLIB': 2
+    'LOG':    0,
+    'CMD':    1,
+    'STDLIB': 2,
+    'SDRAM':  3,
 }
 
 # Error definitions
@@ -59,6 +61,7 @@ log_status = {
         ERR+4:  'CMD_ERR_NULLPTR',
         ERR+5:  'CMD_ERR_DATA',
         ERR+6:  'CMD_ERR_NOFUNC',
+        ERR+7:  'CMD_ERR_NOMOD',
         END-1:  'CMD_ERR_UNKNOWN'
     },
     'STDLIB': {
@@ -66,6 +69,13 @@ log_status = {
         WARN-1: 'STDLIB_INFO_UNKNOWN',
         ERR-1:  'STDLIB_WARN_UNKNOWN',
         END-1:  'STDLIB_ERR_UNKNOWN'
+    },
+    'SDRAM': {
+        INFO:   'SDRAM_INFO_OK',
+        WARN-1: 'SDRAM_INFO_UNKNOWN',
+        WARN:   'SDRAM_WARN_ALINIT', 
+        ERR-1:  'SDRAM_WARN_UNKNOWN',
+        END-1:  'SDRAM_ERR_UNKNOWN'
     }
 }
 
@@ -78,6 +88,9 @@ cmd_functions = {
     },
     'STDLIB': {
         'STD_FUNC_DUMMY': 0,
+    },
+    'SDRAM': {
+        'SDRAM_FUNC_INIT': 0,
     }
 }
 
@@ -328,6 +341,8 @@ def cmd_parse_input(cmd):
         cmd_send("LOG", "LOG_FUNC_INIT", 0, 0)
     elif cmd == "cmd init":
         cmd_send("CMD", "CMD_FUNC_INIT", 0, 0)
+    elif cmd == "sdram init":
+        cmd_send("SDRAM", "SDRAM_FUNC_INIT", 0, 0)
     else:
         print_warning("Invalid command. Type 'help' to view a list of commands")
 
@@ -339,7 +354,9 @@ def cmd_help():
           "\t\tstop:\t\tstop a debug session\n" +
           "\t\trestart:\trestart a debug session\n" +
           "\tlog\tinit:\t\tinitialize the logger module\n" +
-          "\tcmd\tinit:\t\tinitialize the command module")
+          "\tcmd\tinit:\t\tinitialize the command module\n" +
+          "\tsdram\tinit:\t\tinitialize the SDRAM interface")
+          
 
 def cmd_stlink_restart():
     global p
@@ -405,7 +422,7 @@ def serial_print_log(l):
     serial_reset()
     string = ""
     if l[0] in log_modules:
-        string += log_modules[l[0]] + ": "
+        string += log_modules[l[0]] + ":\t"
         if l[1] in log_status[log_modules[l[0]]]:
             string += log_status[log_modules[l[0]]][l[1]]
         elif l[1] >= INFO and l[1] < WARN:

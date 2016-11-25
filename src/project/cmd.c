@@ -14,6 +14,7 @@
 
 #include "cmd.h"
 #include "err.h"
+#include "sdram.h"
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_rcc.h"
 #include <stdint.h>
@@ -21,6 +22,11 @@
 
 #ifdef __CMD
 #include "stm32f4xx_usart.h"
+#endif
+
+#ifdef __STM32F429I_DISCOVERY
+#include "stm32f429i_discovery.h"
+#include "stm32f429i_discovery_sdram.h"
 #endif
 
 /* @brief instance of queue
@@ -457,6 +463,31 @@ cmd_status_t cmd_Loop() {
                             1, &(cmd->cmd_func));        
                 }
                 break;
+        case SDRAM:
+            switch (cmd->cmd_func) {
+                case SDRAM_FUNC_INIT:
+                    if (cmd->cmd_data != 0) {
+                        log_Log(CMD, CMD_ERR_DATA, "Initalization command should not have data.\0");
+                    }
+                    sdram_status_t sd_st = sdram_Init();
+                    if (sd_st == SDRAM_INFO_OK) {
+                        log_Log(SDRAM, SDRAM_INFO_OK, "Initialized SDRAM interface.\0");
+                    } else if (sd_st == SDRAM_WARN_ALINIT) {
+                        log_Log(SDRAM, SDRAM_WARN_ALINIT, "SDRAM alredy initialized.\0");
+                    } else {
+                        log_Log(SDRAM, sd_st, "Failed to initialize SDRAM.");
+                    }                    
+                    break;
+                default:
+                    log_Log(CMD, CMD_ERR_NOFUNC, "Tried to call an SDRAM function that doesn't exist.\0", 
+                            1, &(cmd->cmd_func));
+                    break;
+ 
+            }
+            break;
+        default:
+            log_Log(CMD, CMD_ERR_NOMOD, "Tried to send a command to an unknown module.\0");
+            break;
         }
 
         // Free memory, pass warning about freeing freed memory

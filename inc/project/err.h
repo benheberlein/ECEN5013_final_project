@@ -69,6 +69,7 @@ typedef enum cmd_status_e {
     CMD_ERR_NULLPTR = ERR+4,
     CMD_ERR_DATA = ERR+5,
     CMD_ERR_NOFUNC = ERR+6,
+    CMD_ERR_NOMOD = ERR+7,
     CMD_ERR_UNKNOWN = END-1,
 } cmd_status_t;
 
@@ -82,6 +83,20 @@ typedef enum stdlib_status_e {
 
     STDLIB_ERR_UNKNOWN = END-1,
 } stdlib_status_e;
+
+/* @brief SDRAM status
+ */
+typedef enum sdram_status_e {
+    SDRAM_INFO_OK = INFO,
+    SDRAM_INFO_UNKNOWN = WARN-1,
+
+    SDRAM_WARN_ALINIT = WARN,
+    SDRAM_WARN_UNKNOWN = ERR-1,
+
+    SDRAM_ERR_UNKNOWN = END-1,
+} sdram_status_t;
+
+
 
 /**************************************
  * @name Public functions

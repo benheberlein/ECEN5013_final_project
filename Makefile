@@ -26,6 +26,10 @@ CAMERA=ARDUCAM_OV5647
 # Default is ESP8266
 WIFI=ESP8266
 
+# Discovery board 
+# Options are STM32F429I_DISCOVERY
+BOARD=STM32F429I_DISCOVERY
+
 # VARIABLES
 # -----------------
 
@@ -86,6 +90,10 @@ ifeq ($(WIFI),ESP8266)
   COMP_FLAGS += __ESP8266
 else
   $(error Bad value for WIFI)
+endif
+
+ifeq ($(BOARD),STM32F429I_DISCOVERY)
+  COMP_FLAGS += __STM32F429I_DISCOVERY
 endif
 
 # INCLUDES

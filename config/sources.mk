@@ -2,6 +2,7 @@
 SRCS := main.c \
 		log.c \
         cmd.c \
+		sdram.c \
 		\
         system_stm32f4xx.c \
         startup_stm32f429_439xx.s \
@@ -10,7 +11,7 @@ SRCS := main.c \
 		misc.c \
 		stm32f4xx_rcc.c \
 		stm32f4xx_gpio.c \
-		stm32f4xx_exti.c 
+		stm32f4xx_exti.c \
 
 ifneq ($(LOG),NONE)
   SRCS += stm32f4xx_usart.c
@@ -18,6 +19,11 @@ else
   ifeq ($(CMD),TRUE)
     SRCS += stm32f4xx_usart.c
   endif	
+endif
+
+ifeq ($(BOARD),STM32F429I_DISCOVERY)
+  SRCS += stm32f429i_discovery_sdram.c \
+		  stm32f4xx_fmc.c
 endif
 
 # Object files
@@ -28,12 +34,13 @@ OBJS := $(OBJS:.s=.o)
 ASMS := $(SRCS:.c=.s)
 
 # Search path for source files
-VPATH = src:src/drivers:src/project:src/startup
+VPATH = src:src/drivers:src/drivers/discovery:src/project:src/startup
 
 # Include directory
 INC_DIR := inc \
            inc/project \
            inc/drivers \
+		   inc/drivers/discovery \
            inc/startup
 
 # Config directory

@@ -20,7 +20,8 @@
 typedef enum mod_e {
     LOG,
     CMD,
-    STDLIB
+    STDLIB,
+    SDRAM
 } mod_t;
 
 # endif /* __MOD_H */

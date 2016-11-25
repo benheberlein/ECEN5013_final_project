@@ -1,8 +1,8 @@
-/** @file template.c
- *  @brief Implemenation of the template file.
+/** @file sdram.c
+ *  @brief Implemenation of the SDRAM functions
  *
- *  This contains the implementations of the 
- *  template file functions.
+ *  This file implements the SDRAM functions
+ *  depending on the flag __STM32F429I_DISCOVERY
  *
  *  @author Ben Heberlein
  *  @bug No known bugs.
@@ -12,21 +12,34 @@
  * Includes and definitions
  */
 
-#include "template.h"
+#include "sdram.h"
 #include <stdint.h>
+#include "err.h"
 
-/**************************************
- * Private functions
+#ifdef __STM32F429I_DISCOVERY
+#include "stm32f429i_discovery.h"
+#include "stm32f429i_discovery_sdram.h"
+#endif
+
+/* @ brief Initialization flag
  */
-
-uint8_t template_privateFunction(uint8_t ch) {
-
-}
+static uint8_t sdram_initialized = 0;
 
 /**************************************
  * Public functions
  */
 
-uint8_t template_PublicFunction(uint8_t ch) {
+sdram_status_t sdram_Init() {
+    if (sdram_initialized == 1) {
+        return SDRAM_WARN_ALINIT;
+    }
 
+    #ifdef __STM32F429I_DISCOVERY
+    // Call discovery board function
+    SDRAM_Init();
+    sdram_initialized = 1;
+    return SDRAM_INFO_OK;
+    #endif
+    
+    return SDRAM_ERR_UNKNOWN;
 }
