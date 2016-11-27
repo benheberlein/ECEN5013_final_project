@@ -11,7 +11,7 @@ SRCS := main.c \
 		misc.c \
 		stm32f4xx_rcc.c \
 		stm32f4xx_gpio.c \
-		stm32f4xx_exti.c \
+		stm32f4xx_exti.c
 
 ifneq ($(LOG),NONE)
   SRCS += stm32f4xx_usart.c
@@ -24,6 +24,12 @@ endif
 ifeq ($(BOARD),STM32F429I_DISCOVERY)
   SRCS += stm32f429i_discovery_sdram.c \
 		  stm32f4xx_fmc.c
+endif
+
+ifeq ($(CAMERA),OV5642)
+  SRCS += ov5642.c \
+		  stm32f4xx_dma.c \
+		  stm32f4xx_dcmi.c
 endif
 
 # Object files

@@ -20,6 +20,7 @@ log_modules = {
     1: 'CMD',
     2: 'STDLIB',
     3: 'SDRAM',
+    4: 'OV5642',
 }
 
 # reversed for easier sending
@@ -28,6 +29,7 @@ cmd_modules = {
     'CMD':    1,
     'STDLIB': 2,
     'SDRAM':  3,
+    'OV5642': 4,
 }
 
 # Error definitions
@@ -45,6 +47,7 @@ log_status = {
         ERR-1:  'LOG_WARN_UNKNOWN',
         ERR:    'LOG_ERR_DATASIZE',
         ERR+1:  'LOG_ERR_MSGSIZE',
+        ERR+2:  'LOG_ERR_LOGOFF',
         END-1:  'LOG_ERR_UNKNOWN' 
     },
     'CMD': {
@@ -76,6 +79,13 @@ log_status = {
         WARN:   'SDRAM_WARN_ALINIT', 
         ERR-1:  'SDRAM_WARN_UNKNOWN',
         END-1:  'SDRAM_ERR_UNKNOWN'
+    },
+    'OV5642': {
+        INFO:   'OV5642_INFO_OK',
+        WARN-1: 'OV5642_INFO_UNKNOWN',
+        WARN:   'OV5642_WARN_ALINIT', 
+        ERR-1:  'OV5642_WARN_UNKNOWN',
+        END-1:  'OV5642_ERR_UNKNOWN'
     }
 }
 

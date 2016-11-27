@@ -22,6 +22,10 @@
 #include <stdint.h>
 #include "err.h"
 
+/* @brief SDRAM address
+ */
+#define SDRAM_BASEADDR ((uint32_t)0xD0100000)
+
 /**************************************
  * Private functions
  */
@@ -40,4 +44,28 @@
  */
 sdram_status_t sdram_Init();
 
-# endif /* __TEMPLATE_H */
+/** @brief Writes to the SDRAM
+ *
+ *  This will write to the sdram at a specified address
+ *  using the supplied buffer, address, and transfer size.
+ *
+ *  @param buf the buffer to read from
+ *  @param addr the address to write to
+ *  @param size size in bytes to write
+ *  @return a status code of the type sdram_status_t
+ */
+sdram_status_t sdram_write(uint32_t *buf, uint32_t addr, uint32_t size);
+
+/** @brief Reads from the SDRAM
+ *
+ *  This will read fram the sdram at a specified address
+ *  with the supplied buffer, address, and transfer size.
+ * 
+ *  @param buf the buffer to write to
+ *  @param addr the address to read from
+ *  @param size size in bytes to read
+ *  @return a status code of the type sdram_status_t
+ */
+sdram_status_t sdram_read(uint32_t *buf, uint32_t addr, uint32_t size);
+
+# endif /* __SDRAM_H */

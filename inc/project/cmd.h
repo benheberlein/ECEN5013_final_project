@@ -104,6 +104,17 @@ cmd_status_t cmd_queueInit();
  *  @return a status value of the type cmd_status_t
  */
 cmd_status_t cmd_uartInit();
+
+/** @brief UART Rx interrupt handler
+ *
+ *  The interrupt handler saves a command into a command
+ *  buffer, checking if we have recieved the correct 
+ *  number of bytes. It keeps track of the total, adjusting
+ *  based on the data length parameter. When a full command
+ *  is recieved, it is put into the command queue to be 
+ *  executed.
+ */
+void USART2_IRQHandler(void);
 #endif
 
 /**************************************

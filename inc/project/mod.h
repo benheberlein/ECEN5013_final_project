@@ -21,7 +21,8 @@ typedef enum mod_e {
     LOG,
     CMD,
     STDLIB,
-    SDRAM
+    SDRAM,
+    OV5642
 } mod_t;
 
 # endif /* __MOD_H */

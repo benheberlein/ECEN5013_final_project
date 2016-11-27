@@ -17,9 +17,9 @@ LOG=ERR
 CMD=TRUE
 
 # Camera module
-# Options are ARDUCAM_OV5647
-# Default is ARDUCAM_OV5647
-CAMERA=ARDUCAM_OV5647
+# Options are OV5642
+# Default is OV5642
+CAMERA=OV5642
 
 # Wifi Module
 # Options are ESP8266
@@ -80,8 +80,8 @@ else
   endif
 endif
 
-ifeq ($(CAMERA),ARDUCAM_OV5647)
-  COMP_FLAGS += __ARDUCAM_OV5647
+ifeq ($(CAMERA),OV5642)
+  COMP_FLAGS += __OV5642
 else
   $(error Bad value for CAMERA)
 endif

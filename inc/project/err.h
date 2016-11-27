@@ -45,6 +45,7 @@ typedef enum log_status_e {
     
     LOG_ERR_DATASIZE = ERR,
     LOG_ERR_MSGSIZE = ERR+1,
+    LOG_ERR_LOGOFF = ERR+2,
     LOG_ERR_UNKNOWN = END-1
 } log_status_t;
 
@@ -96,7 +97,17 @@ typedef enum sdram_status_e {
     SDRAM_ERR_UNKNOWN = END-1,
 } sdram_status_t;
 
+/* @brief OV5642 status
+ */
+typedef enum ov5642_status_e {
+    OV5642_INFO_OK = INFO,
+    OV5642_INFO_UNKNOWN = WARN-1,
 
+    OV5642_WARN_ALINIT = WARN,
+    OV5642_WARN_UNKNOWN = ERR-1,
+
+    OV5642_ERR_UNKNOWN = END-1,
+} ov5642_status_t;
 
 /**************************************
  * @name Public functions

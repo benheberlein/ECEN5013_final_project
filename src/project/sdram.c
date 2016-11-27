@@ -43,3 +43,24 @@ sdram_status_t sdram_Init() {
     
     return SDRAM_ERR_UNKNOWN;
 }
+
+sdram_status_t sdram_write(uint32_t *buf, uint32_t addr, uint32_t size) {
+
+    #ifdef __STM32F429I_DISCOVERY
+    SDRAM_WriteBuffer(buf, addr, size);
+    return SDRAM_INFO_OK;
+    #endif
+
+    return SDRAM_ERR_UNKNOWN;
+
+}
+
+sdram_status_t sdram_read(uint32_t *buf, uint32_t addr, uint32_t size) {
+
+    #ifdef __STM32F429I_DISCOVERY
+    SDRAM_ReadBuffer(buf, addr, size);
+    return SDRAM_INFO_OK;
+    #endif
+    
+    return SDRAM_ERR_UNKNOWN;
+}

@@ -150,7 +150,7 @@ log_status_t log_Init();
 #define log_Log(...) LOG_SELECT(__VA_ARGS__,log_log5,log_log4,log_log3,log_log2,log_log1,log_log0)(__VA_ARGS__)
 
 #else
-#define log_Log(...) 
+#define log_Log(...) LOG_ERR_LOGOFF
 #endif
 
 # endif /* __LOG_H */
