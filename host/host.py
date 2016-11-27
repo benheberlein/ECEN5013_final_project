@@ -82,9 +82,14 @@ log_status = {
     },
     'OV5642': {
         INFO:   'OV5642_INFO_OK',
+        INFO:   'OV5642_INFO_IMAGE',
         WARN-1: 'OV5642_INFO_UNKNOWN',
         WARN:   'OV5642_WARN_ALINIT', 
         ERR-1:  'OV5642_WARN_UNKNOWN',
+        ERR:    'OV5642_ERR_I2CSTART',
+        ERR+1:  'OV5642_ERR_I2CREAD',
+        ERR+2:  'OV5642_ERR_I2CWRITE',
+        ERR+3:  'OV5642_ERR_I2CTIMEOUT',
         END-1:  'OV5642_ERR_UNKNOWN'
     }
 }
@@ -428,12 +433,40 @@ def serial_reset():
     serial_list = []
     serial_start_time = 0
 
+def serial_handle_image(l):
+    string = ""
+    string += log_modules[l[0]]
+    string += log_status[log_modules[l[0]]][l[1]]
+
+    if l[2] != 0:
+        string += "\n"
+        substring = ""
+
+        for char in l[3:3+l[2]]:
+            substring += chr(char)
+        string += substring
+
+    data_size = l[l[2]+3] + l[l[2]+4] << 8 + l[l[2]+5] << 16 + l[l[2]+6] << 24
+
+    if data_size != 0:
+
+        f = open('./data/output_' + time.strftime("%Y%m%d_%H%M%S", time.gmtime()) + '.raw', 'wb')
+        f.write(bytes(l))
+        f.close()
+    else:
+        print_error("Image sent without data packet!")
+ 
+
 def serial_print_log(l):
     serial_reset()
     string = ""
     if l[0] in log_modules:
         string += log_modules[l[0]] + ":\t"
         if l[1] in log_status[log_modules[l[0]]]:
+            # Handle image differently
+            if l[1] == "OV5642_INFO_IMAGE":
+                serial_handle_image(l)
+                return
             string += log_status[log_modules[l[0]]][l[1]]
         elif l[1] >= INFO and l[1] < WARN:
             sring += log_status[log_modules[l[0]]][WARN-1]
@@ -443,7 +476,7 @@ def serial_print_log(l):
             string += log_status[log_modules[l[0]]][END-1]
 
         if l[2] != 0:
-            string += "\t"
+            string += "\n"
             substring = ""
             for char in l[3:3+l[2]]:
                 substring += chr(char)

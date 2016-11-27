@@ -22,9 +22,10 @@
 #include <stdint.h>
 #include "err.h"
 
-/* @brief SDRAM address
+/* @brief SDRAM addresses
  */
-#define SDRAM_BASEADDR ((uint32_t)0xD0100000)
+#define SDRAM_BASEADDR 0xD0100000
+#define SDRAM_IMAGEADDR SDRAM_BASEADDR
 
 /**************************************
  * Private functions

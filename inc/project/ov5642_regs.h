@@ -23,14 +23,12 @@
 #define OV5642_CHIPID_HIGH 0x300a
 #define OV5642_CHIPID_LOW 0x300b
 
-#define PROGMEM
-
-struct ov5642_reg {
+typedef struct __attribute__ ((packed)) ov5642_reg_s {
     uint16_t reg;
-    uint16_t val;
-};
+    uint8_t val;
+} ov5642_reg_t;
 
-const struct ov5642_reg ov5642_320x240[] PROGMEM =
+const ov5642_reg_t ov5642_320x240[] =
 {
 	{0x3800 ,0x1 },
 	{0x3801 ,0xa8},
@@ -61,7 +59,7 @@ const struct ov5642_reg ov5642_320x240[] PROGMEM =
 	{0xffff, 0xff},
 };
 
-const struct ov5642_reg ov5642_640x480[] PROGMEM =
+const ov5642_reg_t ov5642_640x480[] =
 {
 	{0x3800 ,0x1 },
 	{0x3801 ,0xa8},
@@ -92,7 +90,7 @@ const struct ov5642_reg ov5642_640x480[] PROGMEM =
 	{0xffff, 0xff},
 };
 
-const struct ov5642_reg ov5642_1280x960[] PROGMEM =
+const ov5642_reg_t ov5642_1280x960[] =
 {
 	{0x3800 ,0x1 },
 	{0x3801 ,0xB0},
@@ -122,7 +120,7 @@ const struct ov5642_reg ov5642_1280x960[] PROGMEM =
 	{0xffff, 0xff},
 };
 
-const struct ov5642_reg ov5642_1600x1200[] PROGMEM =
+const ov5642_reg_t ov5642_1600x1200[] =
 {
 	{0x3800 ,0x1 },
 	{0x3801 ,0xB0},
@@ -152,8 +150,7 @@ const struct ov5642_reg ov5642_1600x1200[] PROGMEM =
 	{0xffff, 0xff},
 };
 
-const struct ov5642_reg ov5642_1024x768[] PROGMEM =
-
+const ov5642_reg_t ov5642_1024x768[] =
 {
 	{0x3800 ,0x1 },
 	{0x3801 ,0xB0},
@@ -183,7 +180,7 @@ const struct ov5642_reg ov5642_1024x768[] PROGMEM =
 	{0xffff, 0xff},
 };
 
-const struct ov5642_reg ov5642_2048x1536[] PROGMEM =
+const ov5642_reg_t ov5642_2048x1536[] =
 {
 	{0x3800 ,0x01},
 	{0x3801 ,0xb0},
@@ -248,8 +245,7 @@ const struct ov5642_reg ov5642_2048x1536[] PROGMEM =
 	{0xffff, 0xff},
 };
 
-const struct ov5642_reg ov5642_2592x1944[] PROGMEM =
-    
+const ov5642_reg_t ov5642_2592x1944[] =
 {
 	{0x3800 ,0x1 },
 	{0x3801 ,0xB0},
@@ -279,7 +275,7 @@ const struct ov5642_reg ov5642_2592x1944[] PROGMEM =
 	{0xffff, 0xff},
 };
 
-const struct ov5642_reg ov5642_dvp_zoom8[] PROGMEM=
+const ov5642_reg_t ov5642_dvp_zoom8[] =
 {
 
 	{0x3800 ,0x5 },
@@ -320,7 +316,7 @@ const struct ov5642_reg ov5642_dvp_zoom8[] PROGMEM=
 	{0xffff, 0xff},
 };
 
-const struct ov5642_reg OV5642_QVGA_Preview[] PROGMEM =
+const ov5642_reg_t OV5642_QVGA_Preview[]  =
 
 {
 	{0x3103 ,0x93},
@@ -919,7 +915,7 @@ const struct ov5642_reg OV5642_QVGA_Preview[] PROGMEM =
 	{0xffff,0xff},
 };        
 
-const struct ov5642_reg OV5642_JPEG_Capture_QSXGA[] PROGMEM =
+const ov5642_reg_t OV5642_JPEG_Capture_QSXGA[] =
 {
 	// OV5642_ QSXGA _YUV7.5 fps
 	// 24 MHz input clock, 24Mhz pclk
@@ -1004,7 +1000,7 @@ const struct ov5642_reg OV5642_JPEG_Capture_QSXGA[] PROGMEM =
 };
 
 
-const struct ov5642_reg OV5642_1080P_Video_setting[] PROGMEM = 
+const ov5642_reg_t OV5642_1080P_Video_setting[] = 
 {
 	{0x3103 ,0x93},
 	{0x3008 ,0x82},
@@ -1557,7 +1553,7 @@ const struct ov5642_reg OV5642_1080P_Video_setting[] PROGMEM =
 	{0xffff, 0xff},
 };
 
-const struct ov5642_reg OV5642_720P_Video_setting[] PROGMEM = 
+const ov5642_reg_t OV5642_720P_Video_setting[] = 
 {
 	{0x3103 ,0x93},
 	{0x3008 ,0x82},

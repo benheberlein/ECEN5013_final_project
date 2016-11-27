@@ -101,11 +101,16 @@ typedef enum sdram_status_e {
  */
 typedef enum ov5642_status_e {
     OV5642_INFO_OK = INFO,
+    OV5642_INFO_IMAGE = INFO+1,
     OV5642_INFO_UNKNOWN = WARN-1,
 
     OV5642_WARN_ALINIT = WARN,
     OV5642_WARN_UNKNOWN = ERR-1,
 
+    OV5642_ERR_I2CSTART = ERR,
+    OV5642_ERR_I2CREAD = ERR+1,
+    OV5642_ERR_I2CWRITE = ERR+2,
+    OV5642_ERR_I2CTIMEOUT = ERR+3,
     OV5642_ERR_UNKNOWN = END-1,
 } ov5642_status_t;
 

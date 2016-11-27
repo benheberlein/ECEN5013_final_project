@@ -29,7 +29,8 @@ endif
 ifeq ($(CAMERA),OV5642)
   SRCS += ov5642.c \
 		  stm32f4xx_dma.c \
-		  stm32f4xx_dcmi.c
+		  stm32f4xx_dcmi.c \
+		  stm32f4xx_i2c.c
 endif
 
 # Object files

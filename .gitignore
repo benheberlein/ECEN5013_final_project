@@ -35,3 +35,7 @@
 # Output folders
 bin/*
 build/*
+data/*
+
+# Image data
+*.raw
