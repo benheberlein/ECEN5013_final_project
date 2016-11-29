@@ -12,6 +12,7 @@ import atexit
 import time
 import signal
 import struct
+import gc
 
 # Module definitions
 # KEEP IN SYNC WITH C CODE
@@ -21,6 +22,7 @@ log_modules = {
     2: 'STDLIB',
     3: 'SDRAM',
     4: 'OV5642',
+    5: 'OV7670',
 }
 
 # reversed for easier sending
@@ -30,6 +32,7 @@ cmd_modules = {
     'STDLIB': 2,
     'SDRAM':  3,
     'OV5642': 4,
+    'OV7670': 5,
 }
 
 # Error definitions
@@ -82,7 +85,7 @@ log_status = {
     },
     'OV5642': {
         INFO:   'OV5642_INFO_OK',
-        INFO:   'OV5642_INFO_IMAGE',
+        INFO+1: 'OV5642_INFO_IMAGE',
         WARN-1: 'OV5642_INFO_UNKNOWN',
         WARN:   'OV5642_WARN_ALINIT', 
         ERR-1:  'OV5642_WARN_UNKNOWN',
@@ -91,6 +94,18 @@ log_status = {
         ERR+2:  'OV5642_ERR_I2CWRITE',
         ERR+3:  'OV5642_ERR_I2CTIMEOUT',
         END-1:  'OV5642_ERR_UNKNOWN'
+    },
+    'OV7670': {
+        INFO:   'OV7670_INFO_OK',
+        INFO+1: 'OV7670_INFO_IMAGE',
+        WARN-1: 'OV7670_INFO_UNKNOWN',
+        WARN:   'OV7670_WARN_ALINIT', 
+        ERR-1:  'OV7670_WARN_UNKNOWN',
+        ERR:    'OV7670_ERR_I2CSTART',
+        ERR+1:  'OV7670_ERR_I2CREAD',
+        ERR+2:  'OV7670_ERR_I2CWRITE',
+        ERR+3:  'OV7670_ERR_I2CTIMEOUT',
+        END-1:  'OV7670_ERR_UNKNOWN'
     }
 }
 
@@ -110,25 +125,27 @@ cmd_functions = {
 }
 
 # Serial port Baud rate
-BAUD_RATE = 115200 
+BAUD_RATE = 115200
 
 # Serial port
 ser = serial.Serial()
 
 # Serial Rx queue
 q_serial = queue.Queue()
+q_list = b''
 
 # Serial command byte count and sizes
 serial_count = 0
 serial_total = 7
 serial_header_size = 3
 serial_msg_size = 0
-serial_list = []
+serial_data_size = 0
+serial_list = []#b''
 serial_timeout = 1.0
 serial_start_time = 0
 
 # Serial flag to block on transmit
-serial_tx = False
+serial_rx = True
 
 # User Input
 q_input = queue.Queue()
@@ -284,10 +301,10 @@ def proc_stlink():
 
 def proc_read_serial():
     global ser
-    global serial_tx
+    global serial_rx
     while True:
-        if serial_tx == False:
-            q_serial.put(ser.read())
+        if serial_rx == True and not ser.inWaiting() == 0:
+            q_serial.put(ser.read(ser.inWaiting()))
 
 def proc_read_input():
     while True:
@@ -323,8 +340,8 @@ def cmd_send(module, function, data_len, data):
     d = bytes(struct.pack('<Q', data)[0:data_len])
     dl = bytes(struct.pack('<H', data_len))
 
-    global serial_tx
-    serial_tx = True
+    global serial_rx
+    serial_rx = False
 
     ser.write(m)
     time.sleep(0.001)
@@ -338,7 +355,7 @@ def cmd_send(module, function, data_len, data):
     # give UART interrupt time to add command to queue
     time.sleep(0.050)
 
-    serial_tx = False
+    serial_tx = True
 
 def cmd_parse_input(cmd):
     cmd = cmd.lower()
@@ -420,18 +437,25 @@ def cmd_debug_restart():
 # Serial logger section
 def serial_reset():
     global serial_msg_size
+    global serial_data_size
     global serial_count
     global serial_total
     global serial_list
     global serial_start_time
     global serial_header_size
 
+    print("restting with " + str(serial_count) + " as serial count")
+
     serial_header_size = 3
+    serial_data_size = 0
     serial_msg_size = 0
     serial_count = 0
     serial_total = 7
-    serial_list = []
+    serial_list = []#b''
     serial_start_time = 0
+    serial_rx = True;
+
+    print("reset")
 
 def serial_handle_image(l):
     string = ""
@@ -439,22 +463,26 @@ def serial_handle_image(l):
     string += log_status[log_modules[l[0]]][l[1]]
 
     if l[2] != 0:
-        string += "\n"
+        string += "\n\t"
         substring = ""
 
         for char in l[3:3+l[2]]:
             substring += chr(char)
         string += substring
 
-    data_size = l[l[2]+3] + l[l[2]+4] << 8 + l[l[2]+5] << 16 + l[l[2]+6] << 24
+    data_size = (l[l[2]+3]) + (l[l[2]+4] << 8) + (l[l[2]+5] << 16) + (l[l[2]+6] << 24)
+    
+    print_info(string)
 
     if data_size != 0:
+        filename = 'data/output_' + time.strftime("%Y%m%d_%H%M%S", time.gmtime()) + '.raw'
+        with open(filename, "wb") as f:
+            f.write(bytes(l[l[2]+7:]))
 
-        f = open('./data/output_' + time.strftime("%Y%m%d_%H%M%S", time.gmtime()) + '.raw', 'wb')
-        f.write(bytes(l))
-        f.close()
+        print_info("\tSaved image to data folder.")
+
     else:
-        print_error("Image sent without data packet!")
+        print_error("\tImage sent without data packet!")
  
 
 def serial_print_log(l):
@@ -464,19 +492,20 @@ def serial_print_log(l):
         string += log_modules[l[0]] + ":\t"
         if l[1] in log_status[log_modules[l[0]]]:
             # Handle image differently
-            if l[1] == "OV5642_INFO_IMAGE":
+            if log_status[log_modules[l[0]]][l[1]] == "OV5642_INFO_IMAGE" or \
+               log_status[log_modules[l[0]]][l[1]] == "OV7670_INFO_IMAGE":
                 serial_handle_image(l)
                 return
             string += log_status[log_modules[l[0]]][l[1]]
         elif l[1] >= INFO and l[1] < WARN:
-            sring += log_status[log_modules[l[0]]][WARN-1]
+            string += log_status[log_modules[l[0]]][WARN-1]
         elif l[1] >= WARN and l[1] < ERR:
             string += log_status[log_modules[l[0]]][ERR-1]
         else:
             string += log_status[log_modules[l[0]]][END-1]
 
         if l[2] != 0:
-            string += "\n"
+            string += "\n\t"
             substring = ""
             for char in l[3:3+l[2]]:
                 substring += chr(char)
@@ -485,14 +514,14 @@ def serial_print_log(l):
         data_size = l[l[2]+3] + l[l[2]+4] << 8 + l[l[2]+5] << 16 + l[l[2]+6] << 24
 
         if data_size != 0:
-            string += "\nSent with data packet:\n\t"
+            string += "\n\tSent with data packet:\n\t\t"
             substring = ""
             i = 0
             for char in l[l[2]+7:l[2]+7+data_size]:
                 i += 1
                 substring += "0x{:02x}".format(char) + " "
                 if i % 8 == 0:
-                    substring += "\n\t"
+                    substring += "\n\t\t"
             string += substring
         
         if l[1] >= INFO and l[1] < WARN:
@@ -506,36 +535,61 @@ def serial_print_log(l):
         print_error("Recieved log with invalid module ID: " + str(l[0]))
         print_error("Check that the previous call to logger terminated its message with a '\\0'");
 
-def serial_parse_log(data):
-    if (not type(data) == bytes):
-        print_error("Serial byte handler recieved an invalid data type.")
-        return   
-
+def serial_parse_log(d):
     serial_start_time = time.time()
 
-    data = int.from_bytes(data, byteorder='little')
+    global serial_rx
+#    serial_rx = False
+
+#    data = int.from_bytes(data, byteorder='little')
+
+    print(d)
 
     global serial_count
     global serial_msg_size
     global serial_total
     global serial_list
     global serial_header_size
+    global serial_data_size
     global serial_start_time
     global serial_timeout
 
-    serial_count += 1
+#    if serial_count > serial_msg_size + serial_header_size + 4:
+#        serial_count += len(d)
+#        serial_list += d
+#    else:
 
-    serial_list.append(data)
+#        d_count = 0 
+    
+    for data in d:
+        serial_count += 1
+        #d_count += 1
 
-    if serial_count == serial_total:
-        serial_print_log(serial_list)
+        serial_list.append(data) #+= bytes([data])
 
-    if serial_count == serial_header_size:
-        serial_msg_size = data
-        serial_total += data
+        if serial_count == serial_header_size:
+            serial_msg_size = data
+            serial_total += data
+            print(serial_total)
 
-    if serial_count == serial_msg_size + serial_header_size + 1:
-        serial_total += data
+        if serial_count == serial_msg_size + serial_header_size + 1:
+            serial_data_size += data
+        elif serial_count == serial_msg_size + serial_header_size + 2:
+            serial_data_size += (data << 8)
+        elif serial_count == serial_msg_size + serial_header_size + 3:
+            serial_data_size += (data << 16)
+        elif serial_count == serial_msg_size + serial_header_size + 4:
+            serial_data_size += (data << 24)
+            serial_total += serial_data_size
+            print(serial_total)
+        #        break
+            print("Data size:")
+            print(serial_data_size)
+            
+
+        if serial_count == serial_total:
+            print("serial print log")
+            serial_print_log(serial_list)
 
 #######################################
 

@@ -83,7 +83,11 @@ endif
 ifeq ($(CAMERA),OV5642)
   COMP_FLAGS += __OV5642
 else
-  $(error Bad value for CAMERA)
+  ifeq ($(CAMERA),OV7670)
+	COMP_FLAGS += __OV7670
+  else
+  	$(error Bad value for CAMERA)
+  endif
 endif
 
 ifeq ($(WIFI),ESP8266)

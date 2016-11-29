@@ -1,5 +1,5 @@
-/** @file ov5642.h
- *  @brief Function prototypes for the ov5642 camera
+/** @file ov7670.h
+ *  @brief Function prototypes for the ov7670 camera
  *
  *  This contains the driver function prototypes, macros,
  *  constants, and global variables.
@@ -8,45 +8,45 @@
  *  @bug No known bugs.
  */
 
-#ifndef __OV5642_H
-#define __OV5642_H
+#ifndef __OV7670_H
+#define __OV7670_H
 
 /*************************************
  * @name Includes and definitions
  */
 
 #include "err.h"
-#include "ov5642_regs.h"
+#include "ov7670_regs.h"
 #include <stdint.h>
 
 /* @brief Base address of DCMI module and offset of DR 
  * register for DMA requests.
  */
-#define OV5642_DCMI_BASEADDR ((uint32_t)0x50050000)
-#define OV5642_DCMI_OFFSETDR 0x28
-#define OV5642_DCMI_PERIPHADDR (OV5642_DCMI_BASEADDR | OV5642_DCMI_OFFSETDR)
+#define OV7670_DCMI_BASEADDR ((uint32_t)0x50050000)
+#define OV7670_DCMI_OFFSETDR 0x28
+#define OV7670_DCMI_PERIPHADDR (OV7670_DCMI_BASEADDR | OV7670_DCMI_OFFSETDR)
 
 /* @brief DMA Transfer size
  */
-#define OV5642_DMA_BUFSIZE 65535
+#define OV7670_DMA_BUFSIZE 320*240/4*2
 
 /* @brief I2C clock speed
  */
-#define OV5642_I2C2_SPEED 100000
+#define OV7670_I2C2_SPEED 100000
 
 /* @brief I2C ack and nack requests
  */
-#define OV5642_I2C2_ACK 1
-#define OV5642_I2C2_NACK 0
+#define OV7670_I2C2_ACK 1
+#define OV7670_I2C2_NACK 0
 
 /* @brief I2C timeout
  */
-#define OV5642_I2C2_TIMEOUT 0x4000
+#define OV7670_I2C2_TIMEOUT 0x4000
 
-/* @brief OV5642 read and write addresses
+/* @brief OV7670 read and write addresses
  */
-#define OV5642_I2C2_READADDR 0x79 //0x42
-#define OV5642_I2C2_WRITEADDR 0x78 //0x42
+#define OV7670_I2C2_READADDR 0x43
+#define OV7670_I2C2_WRITEADDR 0x42
 
 /**************************************
  * @name Private functions
@@ -55,25 +55,25 @@
 /** @brief Initialize the clock with RCC.
  *
  *  This function initializes the clock used by the 
- *  ov5642 camera module.
+ *  ov7670 camera module.
  *
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_clockInit();
+ov7670_status_t ov7670_clockInit();
 
 /** @brief Initialize the DMA controller
  *
  *  This function initializes and configures DMA for the 
- *  ov5642 camera module. DMA is configured with DMA2,
+ *  ov7670 camera module. DMA is configured with DMA2,
  *  Stream 1, Channel 1. See page 310 of the STM32F4 
  *  family reference manual RM0090.
  *
  *  Configured for circular mode, with maximum stream NDT
  *  transfer size. Configured to transfer into SDRAM.
  *
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_dmaInit();
+ov7670_status_t ov7670_dmaInit();
 
 /** @brief Initialize the DCMI module
  *
@@ -97,18 +97,18 @@ ov5642_status_t ov5642_dmaInit();
  *
  *  DCMI is configured for snapshot mode.
  *
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_dcmiInit();
+ov7670_status_t ov7670_dcmiInit();
 
 /** @brief Initialize I2C
  *
  *  This function initializes I2C to set and control 
- *  ov5642 camera configuration.
+ *  ov7670 camera configuration.
  *
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_i2cInit();
+ov7670_status_t ov7670_i2cInit();
 
 /** @brief Start I2C transmission   
  *
@@ -119,18 +119,18 @@ ov5642_status_t ov5642_i2cInit();
  *
  *  @param address address of the slave
  *  @param direction transfer direction
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_i2cStart(uint8_t address, uint8_t direction);
+ov7670_status_t ov7670_i2cStart(uint8_t address, uint8_t direction);
 
 /** @brief Stop I2C transmission   
  *
  *  This function stops an I2C2 transaction by sending
  *  the STOP condition.
  *
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_i2cStop();
+ov7670_status_t ov7670_i2cStop();
 
 /** @brief Read a byte from the I2C bus     
  *
@@ -139,9 +139,9 @@ ov5642_status_t ov5642_i2cStop();
  *  memory location of data
  *
  *  @param data the byte read
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_i2cRead(uint8_t *data, uint8_t ack);
+ov7670_status_t ov7670_i2cRead(uint8_t *data, uint8_t ack);
 
 /** @brief Write a byte to the I2C bus     
  *
@@ -152,46 +152,46 @@ ov5642_status_t ov5642_i2cRead(uint8_t *data, uint8_t ack);
  *
  *  @param data the byte to send
  *  @param ack if ack is true, request another byte
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_i2cWrite(uint8_t data);
+ov7670_status_t ov7670_i2cWrite(uint8_t data);
 
-/** @brief Write a register in the OV5642
+/** @brief Write a register in the OV7670
  *
- *  This function writes a register in the OV5642 using
+ *  This function writes a register in the OV7670 using
  *  the I2C interface. The I2C interface must be configured
  *  before using this function.
  *
  *  @param reg the register to write
  *  @param value the value to write to the register
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_regWrite(uint16_t reg, uint8_t value);
+ov7670_status_t ov7670_regWrite(uint8_t reg, uint8_t value);
 
-/** @brief Read a register in the OV5642
+/** @brief Read a register in the OV7670
  *
- *  This function reads a register in the OV5642 using
+ *  This function reads a register in the OV7670 using
  *  the I2C interface. The I2C interface must be configured
  *  before using this function.
  *
  *  @param reg the register to read
  *  @param value a pointer to the value that is read
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_regRead(uint16_t reg, uint8_t *value);
+ov7670_status_t ov7670_regRead(uint8_t reg, uint8_t *value);
 
-/** @brief Write an array of register values in the OV5642
+/** @brief Write an array of register values in the OV7670
  *
- *  This function writes the registers in the OV5642 using
+ *  This function writes the registers in the OV7670 using
  *  the I2C interface. The I2C interface must be configured
  *  before using this function. This function writes the 
  *  registers based on address-value mappings in the 
- *  ov5642_regs.h file.
+ *  ov7670_regs.h file.
  *
  *  @param reg the register mapping to write.
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_regWriteArray(const ov5642_reg_t *reg);
+ov7670_status_t ov7670_regWriteArray(const ov7670_reg_t *reg);
 
 /** @brief Frame complete interrupt handler
  *
@@ -205,35 +205,35 @@ void DCMI_IRQHandler();
  * @name Public functions
  */
 
-/** @brief Initialize the ov5642 camera
+/** @brief Initialize the ov7670 camera
  *
- *  This function fully initializes the ov5642 camera.
+ *  This function fully initializes the ov7670 camera.
  *  This should be called before attempting to configure
  *  or take an image.
  *
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_Init();
+ov7670_status_t ov7670_Init();
 
 /** @brief Transfer a configuration to the camera over I2C
  *
  *  This function transfers a configuration from the 
- *  definitions in ov5642_regs.h to the camera module 
+ *  definitions in ov7670_regs.h to the camera module 
  *  over I2C.
  *
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_Configure();
+ov7670_status_t ov7670_Configure();
 
 /** @brief Capture an image and put it into SDRAM.
  *
- *  This function commands the ov5642 module to take an
+ *  This function commands the ov7670 module to take an
  *  image, and transfers the image to SDRAM using DMA and 
  *  DCMI functionality.
  *
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_Capture();
+ov7670_status_t ov7670_Capture();
 
 /** @brief Transfer an image from SDRAM to the host.
  *
@@ -242,8 +242,8 @@ ov5642_status_t ov5642_Capture();
  *  will not work if the logger is disabled (directive 
  *  __LOG needs to be on).
  *
- *  @return a status code of the type ov5642_status_t
+ *  @return a status code of the type ov7670_status_t
  */
-ov5642_status_t ov5642_Transfer();
+ov7670_status_t ov7670_Transfer();
 
-# endif /* __OV5642_H */
+# endif /* __OV7670_H */

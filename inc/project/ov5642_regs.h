@@ -28,7 +28,7 @@ typedef struct __attribute__ ((packed)) ov5642_reg_s {
     uint8_t val;
 } ov5642_reg_t;
 
-const ov5642_reg_t ov5642_320x240[] =
+static const ov5642_reg_t ov5642_320x240[] =
 {
 	{0x3800 ,0x1 },
 	{0x3801 ,0xa8},
@@ -59,7 +59,7 @@ const ov5642_reg_t ov5642_320x240[] =
 	{0xffff, 0xff},
 };
 
-const ov5642_reg_t ov5642_640x480[] =
+static const ov5642_reg_t ov5642_640x480[] =
 {
 	{0x3800 ,0x1 },
 	{0x3801 ,0xa8},
@@ -90,7 +90,7 @@ const ov5642_reg_t ov5642_640x480[] =
 	{0xffff, 0xff},
 };
 
-const ov5642_reg_t ov5642_1280x960[] =
+static const ov5642_reg_t ov5642_1280x960[] =
 {
 	{0x3800 ,0x1 },
 	{0x3801 ,0xB0},
@@ -120,7 +120,7 @@ const ov5642_reg_t ov5642_1280x960[] =
 	{0xffff, 0xff},
 };
 
-const ov5642_reg_t ov5642_1600x1200[] =
+static const ov5642_reg_t ov5642_1600x1200[] =
 {
 	{0x3800 ,0x1 },
 	{0x3801 ,0xB0},
@@ -150,7 +150,7 @@ const ov5642_reg_t ov5642_1600x1200[] =
 	{0xffff, 0xff},
 };
 
-const ov5642_reg_t ov5642_1024x768[] =
+static const ov5642_reg_t ov5642_1024x768[] =
 {
 	{0x3800 ,0x1 },
 	{0x3801 ,0xB0},
@@ -180,7 +180,7 @@ const ov5642_reg_t ov5642_1024x768[] =
 	{0xffff, 0xff},
 };
 
-const ov5642_reg_t ov5642_2048x1536[] =
+static const ov5642_reg_t ov5642_2048x1536[] =
 {
 	{0x3800 ,0x01},
 	{0x3801 ,0xb0},
@@ -245,7 +245,7 @@ const ov5642_reg_t ov5642_2048x1536[] =
 	{0xffff, 0xff},
 };
 
-const ov5642_reg_t ov5642_2592x1944[] =
+static const ov5642_reg_t ov5642_2592x1944[] =
 {
 	{0x3800 ,0x1 },
 	{0x3801 ,0xB0},
@@ -275,7 +275,7 @@ const ov5642_reg_t ov5642_2592x1944[] =
 	{0xffff, 0xff},
 };
 
-const ov5642_reg_t ov5642_dvp_zoom8[] =
+static const ov5642_reg_t ov5642_dvp_zoom8[] =
 {
 
 	{0x3800 ,0x5 },
@@ -316,7 +316,7 @@ const ov5642_reg_t ov5642_dvp_zoom8[] =
 	{0xffff, 0xff},
 };
 
-const ov5642_reg_t OV5642_QVGA_Preview[]  =
+static const ov5642_reg_t OV5642_QVGA_Preview[]  =
 
 {
 	{0x3103 ,0x93},
@@ -915,7 +915,7 @@ const ov5642_reg_t OV5642_QVGA_Preview[]  =
 	{0xffff,0xff},
 };        
 
-const ov5642_reg_t OV5642_JPEG_Capture_QSXGA[] =
+static const ov5642_reg_t OV5642_JPEG_Capture_QSXGA[] =
 {
 	// OV5642_ QSXGA _YUV7.5 fps
 	// 24 MHz input clock, 24Mhz pclk
@@ -1000,7 +1000,7 @@ const ov5642_reg_t OV5642_JPEG_Capture_QSXGA[] =
 };
 
 
-const ov5642_reg_t OV5642_1080P_Video_setting[] = 
+static const ov5642_reg_t OV5642_1080P_Video_setting[] = 
 {
 	{0x3103 ,0x93},
 	{0x3008 ,0x82},
@@ -1553,7 +1553,7 @@ const ov5642_reg_t OV5642_1080P_Video_setting[] =
 	{0xffff, 0xff},
 };
 
-const ov5642_reg_t OV5642_720P_Video_setting[] = 
+static const ov5642_reg_t OV5642_720P_Video_setting[] = 
 {
 	{0x3103 ,0x93},
 	{0x3008 ,0x82},

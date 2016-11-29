@@ -131,7 +131,7 @@ cmd_status_t cmd_uartInit() {
     // Enable USART2 Clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 
-    // Connect Pin D5 to USART2 Rx
+    // Connect Pin D6 to USART2 Rx
     GPIO_PinAFConfig(GPIOD, GPIO_PinSource6, GPIO_AF_USART2);
     
     // Configure USART Rx as alternate function

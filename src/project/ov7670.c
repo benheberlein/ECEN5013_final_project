@@ -1,9 +1,9 @@
-/** @file ov5642.c
- *  @brief Implemenation of the ov5642 camera functions.
+/** @file ov7670.c
+ *  @brief Implemenation of the ov7670 camera functions.
  *
- *  This file implements functionality of the ov5642
+ *  This file implements functionality of the ov7670
  *  camera module. For function descriptions, see the 
- *  ov5642.h file in the include directory.
+ *  ov7670.h file in the include directory.
  *
  *  @author Ben Heberlein
  *  @bug No known bugs.
@@ -13,8 +13,8 @@
  * Includes and definitions
  */
 
-#include "ov5642.h"
-#include "ov5642_regs.h"
+#include "ov7670.h"
+#include "ov7670_regs.h"
 #include "sdram.h"
 #include "log.h"
 #include "err.h"
@@ -31,7 +31,7 @@
  * Private functions
  */
 
-ov5642_status_t ov5642_clockInit() {
+ov7670_status_t ov7670_clockInit() {
     GPIO_InitTypeDef gpioInit;
 
     // Enable HSI clock
@@ -54,10 +54,10 @@ ov5642_status_t ov5642_clockInit() {
     gpioInit.GPIO_Speed = GPIO_High_Speed;
     GPIO_Init(GPIOA, &gpioInit);
 
-    return OV5642_INFO_OK;
+    return OV7670_INFO_OK;
 }
 
-ov5642_status_t ov5642_dmaInit() {
+ov7670_status_t ov7670_dmaInit() {
     DMA_InitTypeDef dmaInit;
     
     /* We are going to use DMA2, Stream 1, Channel 1
@@ -73,10 +73,10 @@ ov5642_status_t ov5642_dmaInit() {
 
     // Construct initialization config
     dmaInit.DMA_Channel = DMA_Channel_1;
-    dmaInit.DMA_PeripheralBaseAddr = OV5642_DCMI_PERIPHADDR;
+    dmaInit.DMA_PeripheralBaseAddr = OV7670_DCMI_PERIPHADDR;
     dmaInit.DMA_Memory0BaseAddr = (uint32_t) SDRAM_IMAGEADDR;
     dmaInit.DMA_DIR = DMA_DIR_PeripheralToMemory;
-    dmaInit.DMA_BufferSize = 10;//OV5642_DMA_BUFSIZE;
+    dmaInit.DMA_BufferSize = 640*480/4;//OV7670_DMA_BUFSIZE;
     dmaInit.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
     dmaInit.DMA_MemoryInc = DMA_MemoryInc_Enable;
     dmaInit.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
@@ -94,10 +94,10 @@ ov5642_status_t ov5642_dmaInit() {
     // Enable
     DMA_Cmd(DMA2_Stream1, ENABLE);
 
-    return OV5642_INFO_OK;
+    return OV7670_INFO_OK;
 }
 
-ov5642_status_t ov5642_dcmiInit() {
+ov7670_status_t ov7670_dcmiInit() {
     GPIO_InitTypeDef gpioInit;
 
     /**********************************
@@ -211,10 +211,10 @@ ov5642_status_t ov5642_dcmiInit() {
     // Enable DCMI
     DCMI_Cmd(ENABLE);
 
-    return OV5642_INFO_OK;
+    return OV7670_INFO_OK;
 }
 
-ov5642_status_t ov5642_i2cInit() {
+ov7670_status_t ov7670_i2cInit() {
     GPIO_InitTypeDef gpioInit;
     I2C_InitTypeDef i2cInit;
 
@@ -246,30 +246,30 @@ ov5642_status_t ov5642_i2cInit() {
     i2cInit.I2C_OwnAddress1 = 0x00;
     i2cInit.I2C_Ack = I2C_Ack_Enable;
     i2cInit.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
-    i2cInit.I2C_ClockSpeed = OV5642_I2C2_SPEED;
+    i2cInit.I2C_ClockSpeed = OV7670_I2C2_SPEED;
 
 
     I2C_Init(I2C2, &i2cInit);
 
     I2C_Cmd(I2C2, ENABLE);
 
-    return OV5642_INFO_OK;
+    return OV7670_INFO_OK;
 }
 
-ov5642_status_t ov5642_i2cStart(uint8_t address, uint8_t direction) {
+ov7670_status_t ov7670_i2cStart(uint8_t address, uint8_t direction) {
     if (!(direction == I2C_Direction_Transmitter ||
           direction == I2C_Direction_Receiver)) {
-        log_Log(OV5642, OV5642_ERR_I2CSTART, "Bad I2C direction.\0");
-        return OV5642_ERR_I2CSTART;
+        log_Log(OV7670, OV7670_ERR_I2CSTART, "Bad I2C direction.\0");
+        return OV7670_ERR_I2CSTART;
     }
     
-    uint32_t timeout = OV5642_I2C2_TIMEOUT;
+    uint32_t timeout = OV7670_I2C2_TIMEOUT;
 
     // Wait until I2C2 is not busy
     while (I2C_GetFlagStatus(I2C2, I2C_FLAG_BUSY)) {
         if (timeout-- == 0) {
-            log_Log(OV5642, OV5642_ERR_I2CTIMEOUT, "I2C timed out.\0");
-            return OV5642_ERR_I2CTIMEOUT;
+            log_Log(OV7670, OV7670_ERR_I2CTIMEOUT, "I2C timed out.\0");
+            return OV7670_ERR_I2CTIMEOUT;
         }
     }
 
@@ -277,11 +277,11 @@ ov5642_status_t ov5642_i2cStart(uint8_t address, uint8_t direction) {
     I2C_GenerateSTART(I2C2, ENABLE);
 
     // Wait for slave acknowledge
-    timeout = OV5642_I2C2_TIMEOUT;
+    timeout = OV7670_I2C2_TIMEOUT;
     while(!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_MODE_SELECT)) {
         if (timeout-- == 0) {
-            log_Log(OV5642, OV5642_ERR_I2CTIMEOUT, "I2C timed out.\0");
-            return OV5642_ERR_I2CTIMEOUT;
+            log_Log(OV7670, OV7670_ERR_I2CTIMEOUT, "I2C timed out.\0");
+            return OV7670_ERR_I2CTIMEOUT;
         }
     }
 
@@ -289,182 +289,166 @@ ov5642_status_t ov5642_i2cStart(uint8_t address, uint8_t direction) {
     I2C_Send7bitAddress(I2C2, address, direction);
 
     // Wait for acknowledgement
-    timeout = OV5642_I2C2_TIMEOUT;
+    timeout = OV7670_I2C2_TIMEOUT;
     if (direction == I2C_Direction_Transmitter) {
         while (!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {
             if (timeout-- == 0) {
-                log_Log(OV5642, OV5642_ERR_I2CTIMEOUT, "I2C timed out.\0");
-                return OV5642_ERR_I2CTIMEOUT;
+                log_Log(OV7670, OV7670_ERR_I2CTIMEOUT, "I2C timed out.\0");
+                return OV7670_ERR_I2CTIMEOUT;
             }   
         }
     } else if (direction == I2C_Direction_Receiver)  {
         while (!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) {
             if (timeout-- == 0) {
-                log_Log(OV5642, OV5642_ERR_I2CTIMEOUT, "I2C timed out.\0");
-                return OV5642_ERR_I2CTIMEOUT;
+                log_Log(OV7670, OV7670_ERR_I2CTIMEOUT, "I2C timed out.\0");
+                return OV7670_ERR_I2CTIMEOUT;
             }   
         }
     }
 
-    return OV5642_INFO_OK;
+    return OV7670_INFO_OK;
 }
 
-ov5642_status_t ov5642_i2cStop() {
+ov7670_status_t ov7670_i2cStop() {
     I2C_GenerateSTOP(I2C2, ENABLE);
-    return OV5642_INFO_OK;
+    return OV7670_INFO_OK;
 }
 
-ov5642_status_t ov5642_i2cRead(uint8_t *data, uint8_t ack) {
-    if (!(ack == OV5642_I2C2_ACK ||
-          ack == OV5642_I2C2_NACK)) {
-        log_Log(OV5642, OV5642_ERR_I2CREAD, "Bad value for ack parameter.\0");
-        return OV5642_ERR_I2CREAD;
+ov7670_status_t ov7670_i2cRead(uint8_t *data, uint8_t ack) {
+    if (!(ack == OV7670_I2C2_ACK ||
+          ack == OV7670_I2C2_NACK)) {
+        log_Log(OV7670, OV7670_ERR_I2CREAD, "Bad value for ack parameter.\0");
+        return OV7670_ERR_I2CREAD;
     }
    
-    uint32_t timeout = OV5642_I2C2_TIMEOUT;            
+    uint32_t timeout = OV7670_I2C2_TIMEOUT;            
 
-    if (ack == OV5642_I2C2_ACK) { 
+    if (ack == OV7670_I2C2_ACK) { 
         I2C_AcknowledgeConfig(I2C2, ENABLE);
     } else {
         I2C_AcknowledgeConfig(I2C2, DISABLE);
     }
     
     // Wait for a byte
-    timeout = OV5642_I2C2_TIMEOUT;
+    timeout = OV7670_I2C2_TIMEOUT;
     while (!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_BYTE_RECEIVED)) {
         if (timeout-- == 0) {
-            log_Log(OV5642, OV5642_ERR_I2CTIMEOUT, "I2C timed out.\0");
-            return OV5642_ERR_I2CTIMEOUT;
+            log_Log(OV7670, OV7670_ERR_I2CTIMEOUT, "I2C timed out.\0");
+            return OV7670_ERR_I2CTIMEOUT;
         }   
     }
 
     // Read and return byte
     *data = I2C_ReceiveData(I2C2);
 
-    return OV5642_INFO_OK;
+    return OV7670_INFO_OK;
 }
 
-ov5642_status_t ov5642_i2cWrite(uint8_t data) {
+ov7670_status_t ov7670_i2cWrite(uint8_t data) {
     I2C_SendData(I2C2, data);
     // Wait for transmission
-    uint32_t timeout = OV5642_I2C2_TIMEOUT;
+    uint32_t timeout = OV7670_I2C2_TIMEOUT;
     while (!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
         if (timeout-- == 0) {
-            log_Log(OV5642, OV5642_ERR_I2CTIMEOUT, "I2C timed out.\0");
-            return OV5642_ERR_I2CTIMEOUT;
+            log_Log(OV7670, OV7670_ERR_I2CTIMEOUT, "I2C timed out.\0");
+            return OV7670_ERR_I2CTIMEOUT;
         }   
     }
 
-    return OV5642_INFO_OK;
+    return OV7670_INFO_OK;
 }
 
-ov5642_status_t ov5642_regWrite(uint16_t address, uint8_t value) {
+ov7670_status_t ov7670_regWrite(uint8_t address, uint8_t value) {
     // Start transaction
-    ov5642_status_t ret = ov5642_i2cStart(OV5642_I2C2_WRITEADDR, I2C_Direction_Transmitter);
-    if (ret != OV5642_INFO_OK) {
-        ov5642_i2cStop();
-        log_Log(OV5642, ret);
+    ov7670_status_t ret = ov7670_i2cStart(OV7670_I2C2_WRITEADDR, I2C_Direction_Transmitter);
+    if (ret != OV7670_INFO_OK) {
+        ov7670_i2cStop();
+        log_Log(OV7670, ret);
         return ret;
     }   
 
-    // Write address high order bits
-    ret = ov5642_i2cWrite(address >> 8);
-    if (ret != OV5642_INFO_OK) {
-        ov5642_i2cStop();
-        log_Log(OV5642, ret);
-        return ret;
-    }
-
-    // Write address low order bits
-    ret = ov5642_i2cWrite(address & 0x00FF);
-    if (ret != OV5642_INFO_OK) {
-        ov5642_i2cStop();
-        log_Log(OV5642, ret);
+    // Write address
+    ret = ov7670_i2cWrite(address & 0x00FF);
+    if (ret != OV7670_INFO_OK) {
+        ov7670_i2cStop();
+        log_Log(OV7670, ret);
         return ret;
     }
 
     // Write data
-    ret = ov5642_i2cWrite(value & 0x00FF);
-    if (ret != OV5642_INFO_OK) {
-        ov5642_i2cStop();
-        log_Log(OV5642, ret);
+    ret = ov7670_i2cWrite(value & 0x00FF);
+    if (ret != OV7670_INFO_OK) {
+        ov7670_i2cStop();
+        log_Log(OV7670, ret);
         return ret;
     }
 
     // Stop transmission
-    ret = ov5642_i2cStop();
-    if (ret != OV5642_INFO_OK) {
-        log_Log(OV5642, ret);
+    ret = ov7670_i2cStop();
+    if (ret != OV7670_INFO_OK) {
+        log_Log(OV7670, ret);
         return ret;
     }
 
-    return OV5642_INFO_OK;
+    return OV7670_INFO_OK;
 }
 
-ov5642_status_t ov5642_regRead(uint16_t address, uint8_t *value) {
+ov7670_status_t ov7670_regRead(uint8_t address, uint8_t *value) {
     // Start transaction
-    ov5642_status_t ret = ov5642_i2cStart(OV5642_I2C2_WRITEADDR, I2C_Direction_Transmitter);
-    if (ret != OV5642_INFO_OK) {
-        ov5642_i2cStop();
-        log_Log(OV5642, ret);
+    ov7670_status_t ret = ov7670_i2cStart(OV7670_I2C2_WRITEADDR, I2C_Direction_Transmitter);
+    if (ret != OV7670_INFO_OK) {
+        ov7670_i2cStop();
+        log_Log(OV7670, ret);
         return ret;
     }   
 
     // Send address high order bits
-    ret = ov5642_i2cWrite(address >> 8);
-    if (ret != OV5642_INFO_OK) {
-        ov5642_i2cStop();
-        log_Log(OV5642, ret);
-        return ret;
-    }
-
-    // Write address low order bits
-    ret = ov5642_i2cWrite(address & 0x00FF);
-    if (ret != OV5642_INFO_OK) {
-        ov5642_i2cStop();
-        log_Log(OV5642, ret);
+    ret = ov7670_i2cWrite(address & 0x00FF);
+    if (ret != OV7670_INFO_OK) {
+        ov7670_i2cStop();
+        log_Log(OV7670, ret);
         return ret;
     }
 
     // Stop transmission
-    ret = ov5642_i2cStop();
-    if (ret != OV5642_INFO_OK) {
-        log_Log(OV5642, ret);
+    ret = ov7670_i2cStop();
+    if (ret != OV7670_INFO_OK) {
+        log_Log(OV7670, ret);
         return ret;
     }
 
     // Start read transmission
-    ret = ov5642_i2cStart(OV5642_I2C2_READADDR, I2C_Direction_Receiver);
-    if (ret != OV5642_INFO_OK) {
-        log_Log(OV5642, ret);
+    ret = ov7670_i2cStart(OV7670_I2C2_READADDR, I2C_Direction_Receiver);
+    if (ret != OV7670_INFO_OK) {
+        log_Log(OV7670, ret);
         return ret;
     }
 
     // Read one byte
-    ret = ov5642_i2cRead(value, OV5642_I2C2_NACK);
-    if (ret != OV5642_INFO_OK) {
-        log_Log(OV5642, ret);
+    ret = ov7670_i2cRead(value, OV7670_I2C2_NACK);
+    if (ret != OV7670_INFO_OK) {
+        log_Log(OV7670, ret);
         return ret;
     }
 
     // Stop transmission
-    ret = ov5642_i2cStop();
-    if (ret != OV5642_INFO_OK) {
-        log_Log(OV5642, ret);
+    ret = ov7670_i2cStop();
+    if (ret != OV7670_INFO_OK) {
+        log_Log(OV7670, ret);
         return ret;
     }
 
-    return OV5642_INFO_OK;;
+    return OV7670_INFO_OK;;
 
 }
 
-ov5642_status_t ov5642_regWriteArray(const ov5642_reg_t *reg) {
-    // reg is terminated with [0xffff, 0xff]
-    ov5642_status_t ret;
-    while (reg->reg != 0xffff || reg->val != 0xff) {
-        ret = ov5642_regWrite(reg->reg, reg->val);
-        if (ret != OV5642_INFO_OK) {
-            log_Log(OV5642, ret, "Couldn't write OV5642 register array.\0");
+ov7670_status_t ov7670_regWriteArray(const ov7670_reg_t *reg) {
+    // reg is terminated with [0xff, 0xff]
+    ov7670_status_t ret;
+    while (reg->reg != 0xff || reg->val != 0xff) {
+        ret = ov7670_regWrite(reg->reg, reg->val);
+        if (ret != OV7670_INFO_OK) {
+            log_Log(OV7670, ret, "Couldn't write OV7670 register array.\0");
             return ret;
         }
 
@@ -472,11 +456,11 @@ ov5642_status_t ov5642_regWriteArray(const ov5642_reg_t *reg) {
         reg++;
     }
 
-    return OV5642_INFO_OK;
+    return OV7670_INFO_OK;
 }
 
 void DCMI_IRQHandler() {
-    log_Log(OV5642, OV5642_INFO_OK, "OVF IRQ.\0");
+    log_Log(OV7670, OV7670_INFO_OK, "OVF IRQ.\0");
     return;
 }
 
@@ -484,52 +468,58 @@ void DCMI_IRQHandler() {
  * Public functions
  */
 
-ov5642_status_t ov5642_Init() {
-    ov5642_status_t ret = ov5642_dmaInit();
-    if (ret != OV5642_INFO_OK) {
-        log_Log(OV5642, ret, "Could not initialize OV5642 DMA.\0");
+ov7670_status_t ov7670_Init() {
+    ov7670_status_t ret = ov7670_dmaInit();
+    if (ret != OV7670_INFO_OK) {
+        log_Log(OV7670, ret, "Could not initialize OV7670 DMA.\0");
         return ret;
     }
 
-    ret = ov5642_dcmiInit();
-    if (ret != OV5642_INFO_OK) {
-        log_Log(OV5642, ret, "Could not initialize OV5642 DCMI.\0");
+    ret = ov7670_dcmiInit();
+    if (ret != OV7670_INFO_OK) {
+        log_Log(OV7670, ret, "Could not initialize OV7670 DCMI.\0");
         return ret;
     }
 
-    ret = ov5642_i2cInit();
-    if (ret != OV5642_INFO_OK) {
-        log_Log(OV5642, ret, "Could not initialize OV5642 I2C.\0");
+    ret = ov7670_i2cInit();
+    if (ret != OV7670_INFO_OK) {
+        log_Log(OV7670, ret, "Could not initialize OV7670 I2C.\0");
         return ret;
     }
 
-    ret = ov5642_clockInit();
-    if (ret != OV5642_INFO_OK) {
-        log_Log(OV5642, ret, "Could not initialize OV5642 clock.\0");
+    ret = ov7670_clockInit();
+    if (ret != OV7670_INFO_OK) {
+        log_Log(OV7670, ret, "Could not initialize OV7670 clock.\0");
         return ret;
     }
 
-    return OV5642_INFO_OK;
+    return OV7670_INFO_OK;
 }
 
-ov5642_status_t ov5642_Configure() {
-    ov5642_status_t ret = ov5642_regWriteArray(ov5642_320x240);
-    if (ret != OV5642_INFO_OK) {
-        log_Log(OV5642, ret, "Could not configure OV5642 registers.\0");
+ov7670_status_t ov7670_Configure() {
+    ov7670_status_t ret = ov7670_regWriteArray(ov7670_default_regs);
+    if (ret != OV7670_INFO_OK) {
+        log_Log(OV7670, ret, "Could not configure OV7670 registers.\0");
         return ret;
     }
-    return OV5642_INFO_OK;
+    ret = ov7670_regWriteArray(ov7670_fmt_raw);
+    if (ret != OV7670_INFO_OK) {
+        log_Log(OV7670, ret, "Could not configure OV7670 registers.\0");
+        return ret;
+    }
+
+    return OV7670_INFO_OK;
 }
 
-ov5642_status_t ov5642_Capture() {
+ov7670_status_t ov7670_Capture() {
     DCMI_CaptureCmd(ENABLE);
     volatile uint32_t a = DCMI->CR;
-    return OV5642_INFO_OK;
+    return OV7670_INFO_OK;
 }
 
-ov5642_status_t ov5642_Transfer() {
-    log_Log(OV5642, OV5642_INFO_OK, "Beginning image transfer.\0");
-    log_Log(OV5642, OV5642_INFO_IMAGE, "\0", 320*240, (uint8_t *) SDRAM_IMAGEADDR);
+ov7670_status_t ov7670_Transfer() {
+    log_Log(OV7670, OV7670_INFO_OK, "Beginning image transfer.\0");
+    log_Log(OV7670, OV7670_INFO_IMAGE, "\0", 640*480, (uint8_t *) SDRAM_IMAGEADDR);
 
-    return OV5642_INFO_OK;
+    return OV7670_INFO_OK;
 }

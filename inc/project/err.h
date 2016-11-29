@@ -114,6 +114,23 @@ typedef enum ov5642_status_e {
     OV5642_ERR_UNKNOWN = END-1,
 } ov5642_status_t;
 
+/* @brief OV7670 status
+ */
+typedef enum ov7670_status_e {
+    OV7670_INFO_OK = INFO,
+    OV7670_INFO_IMAGE = INFO+1,
+    OV7670_INFO_UNKNOWN = WARN-1,
+
+    OV7670_WARN_ALINIT = WARN,
+    OV7670_WARN_UNKNOWN = ERR-1,
+
+    OV7670_ERR_I2CSTART = ERR,
+    OV7670_ERR_I2CREAD = ERR+1,
+    OV7670_ERR_I2CWRITE = ERR+2,
+    OV7670_ERR_I2CTIMEOUT = ERR+3,
+    OV7670_ERR_UNKNOWN = END-1,
+} ov7670_status_t;
+
 /**************************************
  * @name Public functions
  */

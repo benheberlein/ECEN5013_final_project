@@ -85,7 +85,7 @@ log_status_t log_log5(mod_t module, gen_status_t status, char *msg, uint32_t len
 log_status_t log_send(log_packet_t *log_packet) {
 
     // Figure out sizes
-    uint8_t i = 0;
+    uint32_t i = 0;
     uint8_t firstSize = sizeof(log_packet->log_packet_mod) + 
                          sizeof(log_packet->log_packet_status) + 
                          sizeof(log_packet->log_packet_msgLen);

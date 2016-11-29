@@ -1,4 +1,4 @@
-/** @file main.c
+/* @file main.c
  *  @brief This file contains the main routine.
  *
  *  This initializes the logger, command interface, 
@@ -18,6 +18,12 @@
 #include "log.h"
 #include "cmd.h"
 #include "sdram.h"
+#ifdef __OV5642
+#include "ov5642.h"
+#endif
+#ifdef __OV7670
+#include "ov7670.h"
+#endif
 #include <stdint.h>
 
 /**************************************
@@ -52,6 +58,37 @@ int main() {
         log_Log(SDRAM, sd_st, "Could not initialize SDRAM.\0");
     }
     #endif 
+
+    #ifdef __OV5642
+    ov5642_status_t ov_st = ov5642_Init();
+    if (ov_st == OV5642_INFO_OK) {
+        log_Log(OV5642, OV5642_INFO_OK, "Initialized 0V5642 camera module.\0");
+    } else {
+        log_Log(OV5642, ov_st, "Coud not initialize OV5642.\0");
+    }
+
+    ov_st = ov5642_Configure();
+
+    ov_st = ov5642_Capture();
+
+//    ov_st = ov5642_Transfer();
+    #endif
+
+    #ifdef __OV7670
+    ov7670_status_t ov_st = ov7670_Init();
+  
+    if (ov_st == OV7670_INFO_OK) {
+        log_Log(OV5642, OV7670_INFO_OK, "Initialized 0V7670 camera module.\0");
+    } else {
+        log_Log(OV7670, ov_st, "Coud not initialize OV7670.\0");
+    }
+
+    ov_st = ov7670_Configure();
+
+    ov_st = ov7670_Capture();
+
+    ov_st = ov7670_Transfer();
+    #endif
 
     // Start main loop
     cmd_status_t cmd_st = cmd_Loop();

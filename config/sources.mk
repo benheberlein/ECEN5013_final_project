@@ -31,6 +31,13 @@ ifeq ($(CAMERA),OV5642)
 		  stm32f4xx_dma.c \
 		  stm32f4xx_dcmi.c \
 		  stm32f4xx_i2c.c
+else
+  ifeq ($(CAMERA),OV7670)
+	SRCS += ov7670.c \
+			stm32f4xx_dma.c \
+            stm32f4xx_dcmi.c \
+            stm32f4xx_i2c.c
+  endif 
 endif
 
 # Object files
