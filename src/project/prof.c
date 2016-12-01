@@ -1,8 +1,9 @@
-/** @file template.c
- *  @brief Implemenation of the template file.
+/** @file prof.c
+ *  @brief Implemenation of the profiler functions.
  *
- *  This contains the implementations of the 
- *  template file functions.
+ *  This contains the implementations of the profiler 
+ *  functions. The main profiler function is defined as a 
+ *  preprocessor macro in the prof.h file.
  *
  *  @author Ben Heberlein
  *  @bug No known bugs.
@@ -12,21 +13,39 @@
  * Includes and definitions
  */
 
-#include "template.h"
+#include "prof.h"
+#include "err.h"
 #include <stdint.h>
 
 /**************************************
  * Private functions
  */
 
-uint8_t template_privateFunction(uint8_t ch) {
+#ifdef __PROF
+prof_status_t prof_itoa(uint8_t *str, uint16_t data) {
+    return PROF_INFO_OK;
+}
 
+prof_status_t prof_start() {
+    return PROF_INFO_OK;
+}
+
+prof_status_t prof_stop() {
+    return PROF_INFO_OK;
 }
 
 /**************************************
  * Public functions
  */
 
-uint8_t template_PublicFunction(uint8_t ch) {
+#ifdef __PROF
+prof_status_t prof_Init() {
 
 }
+
+/* Preprocessor macro prof_Profile(x) defined in prof.h
+ * This will be the main profiler function called by
+ * the user.
+ */
+#endif
+

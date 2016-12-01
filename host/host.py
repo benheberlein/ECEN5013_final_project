@@ -23,6 +23,8 @@ log_modules = {
     3: 'SDRAM',
     4: 'OV5642',
     5: 'OV7670',
+    6: 'PROF',
+    7: 'TEST',
 }
 
 # reversed for easier sending
@@ -33,6 +35,8 @@ cmd_modules = {
     'SDRAM':  3,
     'OV5642': 4,
     'OV7670': 5,
+    'PROF':   6,
+    'TEST':   7,
 }
 
 # Error definitions
@@ -106,7 +110,25 @@ log_status = {
         ERR+2:  'OV7670_ERR_I2CWRITE',
         ERR+3:  'OV7670_ERR_I2CTIMEOUT',
         END-1:  'OV7670_ERR_UNKNOWN'
+    },
+    'PROF': {
+        INFO:   'PROF_INFO_OK',
+        INFO+1: 'PROF_INFO_RESULTS',
+        WARN-1: 'PROF_INFO_UNKNOWN',
+        ERR-1:  'PROF_WARN_UNKNOWN',
+        END-1:  'PROF_ERR_UNKNOWN'
+        
+    },
+    'TEST': {
+        INFO:   'TEST_INFO_OK',
+        INFO+1: 'TEST_INFO_PASSED',
+        INFO+2: 'TEST_INFO_FAILED',
+        WARN-1: 'TEST_INFO_UNKNOWN',
+        ERR-1:  'TEST_WARN_UNKNOWN',
+        END-1:  'TEST_ERR_UNKNOWN'
+        
     }
+
 }
 
 cmd_functions = {

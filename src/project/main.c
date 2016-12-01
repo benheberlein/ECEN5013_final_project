@@ -74,6 +74,14 @@ int main() {
 //    ov_st = ov5642_Transfer();
     #endif
 
+    int i = 0;
+    while(1) {
+        *((uint8_t *)(0xd0100000) + i) = i;
+        i++;
+        if (i%100 == 0);
+        i = 0;
+    }
+
     #ifdef __OV7670
     ov7670_status_t ov_st = ov7670_Init();
   

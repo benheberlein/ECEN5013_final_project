@@ -9,7 +9,7 @@ function startup()
     else
         print("Exiting initialization script and running application.")
         file.close("init.lua")
-        --dofile(APPLICATION)
+        dofile(APPLICATION)
     end
 end
 

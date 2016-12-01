@@ -131,6 +131,32 @@ typedef enum ov7670_status_e {
     OV7670_ERR_UNKNOWN = END-1,
 } ov7670_status_t;
 
+/* @brief Profiler status
+ */
+typedef enum prof_status_e {
+    PROF_INFO_OK = INFO,
+    PROF_INFO_RESULTS = INFO+1,
+    PROF_INFO_UNKNOWN = WARN-1,
+
+    PROF_WARN_UNKNOWN = ERR-1,
+
+    PROF_ERR_UNKNOWN = END-1,
+} prof_status_e;
+
+/* @brief Profiler status
+ */
+typedef enum test_status_e {
+    TEST_INFO_OK = INFO,
+    TEST_INFO_PASSED = INFO+1,
+    TEST_INFO_FAILED = INFO+2,
+    TEST_INFO_UNKNOWN = WARN-1,
+
+    PROF_WARN_UNKNOWN = ERR-1,
+
+    PROF_ERR_UNKNOWN = END-1,
+} test_status_e;
+
+
 /**************************************
  * @name Public functions
  */
