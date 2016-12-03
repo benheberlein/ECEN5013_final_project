@@ -35,7 +35,20 @@
  *  @param the integer to convert
  *  @return a status code of type prof_status_t.
  */
-prof_status_t prof_itoa(uint8_t *str, uint16_t data);
+prof_status_t prof_itoa(uint8_t *str, uint32_t data);
+
+/** @brief Concatenate two null terminated strings.
+ *
+ *  The output buffer needs to be big enough to fit the
+ *  concatenation with a null terminated string.
+ *
+ *  The concatenation order is str1 + str2.
+ *
+ *  @param buf the output buffer
+ *  @param str1 the first string
+ *  @param str2 the second string
+ */
+prof_status_t prof_concat(uint8_t *buf, uint8_t *str1, uint8_t *str2);
 
 /** @brief Begin profiler
  *
@@ -87,7 +100,7 @@ prof_status_t prof_Init();
  *
  *  Example usage:
  *      For a single function or statement
- *      prof_Profile(xxx_functionToProfile());
+ *      prof_Profile(xxx_functionToProfile(), "Benchmark identifier\0");
  *      
  *      Several statements or functions
  *      prof_Profile(
@@ -95,17 +108,20 @@ prof_status_t prof_Init();
  *          xxx_functionToProfile2();
  *          uint32_t someVariable = 100;
  *          // ...etc
+ *          , "Benchmark identifier\0"
  *      );
  *
  *  For finer control of error handling, consider calling
  *  the start and stop functions directly.
  *
+ *  @param x statements to execute
+ *  @param msg benchmark message ('\0' terminated)
  *  @return status code PROF_INFO_OK in all cases.
  */
 #ifdef __PROF
-#define prof_Profile(x) PROF_INFO_OK; prof_Start(); x; prof_Stop();
+#define prof_Profile(x, msg) prof_start(); x; prof_stop(msg);
 #else 
-#define prof_Profile(x) PROF_INFO_OK; x;
+#define prof_Profile(x, msg) x;
 #endif
 
 #endif /* __PROF_H */

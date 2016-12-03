@@ -24,10 +24,6 @@
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_gpio.h"
 
-#define LOG_MAXMSGSIZE 64
-#define LOG_MAXDATASIZE 16777216
-#define LOG_BAUDRATE 115200
-
 /* @brief Initialization flag for logger
  */
 static uint8_t log_initialized = 0;
@@ -52,7 +48,24 @@ log_status_t log_log4(mod_t module, gen_status_t status, uint32_t len, uint8_t *
 }
 
 log_status_t log_log5(mod_t module, gen_status_t status, char *msg, uint32_t len, uint8_t *data) {
-  
+
+    // Check for compiler verbosity directives
+    #ifdef __LOG_INFO
+    if (status < INFO) {
+        return LOG_WARN_IGNORED;
+    }
+    #endif
+    #ifdef __LOG_WARN
+    if (status < WARN) {
+        return LOG_WARN_IGNORED;
+    }
+    #endif
+    #ifdef __LOG_ERR
+    if (status < ERR) {
+        return LOG_WARN_IGNORED;
+    }
+    #endif
+
     // Check for data size  
     if (len > LOG_MAXDATASIZE) {
         return LOG_ERR_DATASIZE;
@@ -65,7 +78,6 @@ log_status_t log_log5(mod_t module, gen_status_t status, char *msg, uint32_t len
 
         // Check for message size
         if (msgLen == LOG_MAXMSGSIZE) {
-            log_Log(LOG, LOG_ERR_MSGSIZE);
             return LOG_ERR_MSGSIZE;
         }
     }
@@ -116,6 +128,10 @@ log_status_t log_send(log_packet_t *log_packet) {
     i = 0;
     while (i < fourthSize) {
         while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) {}
+        // Delay
+        if (i % 100 == 0) {
+            for (uint32_t j = 0; j < 100000; j++) {}
+        }
         USART_SendData(USART2, *(log_packet->log_packet_data+i));
         i++;
     }
@@ -137,9 +153,6 @@ log_status_t log_Init() {
 
     GPIO_InitTypeDef GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
-
-    // Disable USART2
-    //USART_Cmd(USART2, DISABLE);
 
     // Enable GPIO clock
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);

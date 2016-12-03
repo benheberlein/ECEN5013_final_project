@@ -2,6 +2,8 @@
 # -----------------
 
 # Debug mode
+# Debug mode will suppress the directives
+# __LOG, __CMD, __PROF, __TEST, and __DEBUG
 # Options are TRUE, FALSE
 # Default is TRUE
 DEBUG=TRUE
@@ -9,12 +11,22 @@ DEBUG=TRUE
 # Logger verbosity
 # Options are INFO, WARN, ERR, NONE
 # Default is ERR
-LOG=ERR
+LOG=INFO
 
 # Command interface
 # Options are TRUE, FALSE
 # Default is TRUE
 CMD=TRUE
+
+# Profiler enable
+# Options are TRUE, FALSE
+# Default is TRUE
+PROF=TRUE
+
+# Unit tests enabled
+# Options are TRUE, FALSE
+# Default is TRUE
+TEST=TRUE
 
 # Camera module
 # Options are OV5642
@@ -44,13 +56,13 @@ else
 
     ifneq ($(LOG),NONE) 
       ifeq ($(LOG),INFO)
-        COMP_FLAGS += __LOG __INFO
+        COMP_FLAGS += __LOG __LOG_INFO 
       else
         ifeq ($(LOG),WARN)
-          COMP_FLAGS += __LOG __WARN
+          COMP_FLAGS += __LOG __LOG_WARN
         else
           ifeq ($(LOG),ERR)
-            COMP_FLAGS += __LOG __ERR
+            COMP_FLAGS += __LOG __LOG_ERR
           else 
             $(error Bad value for LOG)
           endif
@@ -72,6 +84,14 @@ else
     else
       ifneq ($(PROF),FALSE)
         $(error, Bad value for PROF)
+      endif
+    endif
+
+    ifeq ($(PROF),TRUE)
+	  COMP_FLAGS += __TEST
+    else  
+      ifneq ($(TEST),FALSE)
+	    $(error, Bad value for TEST)
       endif
     endif
 
@@ -147,6 +167,18 @@ $(BUILD_DIR)/%.o: %.c
 $(BUILD_DIR)/%.o: %.s
 	@$ $(MKDIR_P) $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+# Output preprocessed files from source
+.PHONY: preprocess
+preprocess: $(addprefix $(BUILD_DIR)/, $(PRES))
+
+$(BUILD_DIR)/%.i: %.c
+	@$ $(MKDIR_P) $(BUILD_DIR)
+	$(CC) $(CFLAGS) -E $< -o $@
+
+$(BUILD_DIR)/%.i: %.s
+	@$ $(MKDIR_P) $(BUILD_DIR)
+	# Do nothing
 
 # Output assembly files from source
 .PHONY: assemble

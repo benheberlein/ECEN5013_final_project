@@ -39,6 +39,7 @@
  * Includes and definitions
  */
 
+#include "err.h"
 #include <stdint.h>
 
 /**************************************
@@ -48,6 +49,18 @@
 /**************************************
  * Public functions
  */
+
+/** @brief logging functions
+ */
+test_status_t test_log();
+char *test_log_Init();
+char *test_log_Log();
+
+/** @brief profiler functions
+ */
+test_status_t test_prof();
+char *test_prof_Init();
+char *test_prof_Profile();
 
 #ifdef __TEST
 /** @brief Asserts a condition within a test
@@ -77,19 +90,20 @@
  *  associated failure message.
  *
  *  @param test the input test function name, no params
+ *  @param str the string to display on test success ('\0' terminated)
  *  @return a status of either
  *      TEST_INFO_PASSED
- *      TEST_INFO_FAILED
+ *      TEST_WARN_FAILED
  */
-#define test_Test(test) \
+#define test_Test(test, str) \
     do { \
-        uint8_t *message = test(); \
+        char *message; \
+        message = test(); \
         if (message != NULL) { \
-            log_Log(TEST, TEST_INFO_FAILED, message); \
-            return TEST_INFO_FAILED); \
-        } else \
-            log_Log(TEST, TEST_INFO_PASSED); \
-            return TEST_INFO_PASSED; \
+            log_Log(TEST, TEST_WARN_FAILED, message); \
+            return TEST_WARN_FAILED; \
+        } else { \
+            log_Log(TEST, TEST_INFO_PASSED, str); \
         } \
     } while(0)
 #endif

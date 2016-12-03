@@ -23,6 +23,10 @@
 #include "err.h"
 #include "mod.h"
 
+#define LOG_MAXMSGSIZE 255
+#define LOG_MAXDATASIZE 16777216
+#define LOG_BAUDRATE 460800
+
 /** @brief Type for log packets
  */
 typedef struct __attribute__ ((packed)) log_packet_s {

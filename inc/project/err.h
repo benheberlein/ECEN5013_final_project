@@ -41,6 +41,7 @@ typedef enum log_status_e {
     LOG_INFO_UNKNOWN = WARN-1,
 
     LOG_WARN_ALINIT = WARN,
+    LOG_WARN_IGNORED = WARN+1,
     LOG_WARN_UNKNOWN = ERR-1,
     
     LOG_ERR_DATASIZE = ERR,
@@ -138,23 +139,25 @@ typedef enum prof_status_e {
     PROF_INFO_RESULTS = INFO+1,
     PROF_INFO_UNKNOWN = WARN-1,
 
+    PROF_WARN_ALINIT = WARN,
     PROF_WARN_UNKNOWN = ERR-1,
 
     PROF_ERR_UNKNOWN = END-1,
-} prof_status_e;
+} prof_status_t;
 
 /* @brief Profiler status
  */
 typedef enum test_status_e {
     TEST_INFO_OK = INFO,
     TEST_INFO_PASSED = INFO+1,
-    TEST_INFO_FAILED = INFO+2,
+    TEST_INFO_CONFIRM = INFO+2,
     TEST_INFO_UNKNOWN = WARN-1,
 
-    PROF_WARN_UNKNOWN = ERR-1,
+    TEST_WARN_FAILED = WARN,
+    TEST_WARN_UNKNOWN = ERR-1,
 
-    PROF_ERR_UNKNOWN = END-1,
-} test_status_e;
+    TEST_ERR_UNKNOWN = END-1,
+} test_status_t;
 
 
 /**************************************

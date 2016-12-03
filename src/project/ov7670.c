@@ -513,7 +513,6 @@ ov7670_status_t ov7670_Configure() {
 
 ov7670_status_t ov7670_Capture() {
     DCMI_CaptureCmd(ENABLE);
-    volatile uint32_t a = DCMI->CR;
     return OV7670_INFO_OK;
 }
 

@@ -51,6 +51,7 @@ log_status = {
         INFO:   'LOG_INFO_OK',
         WARN-1: 'LOG_INFO_UNKNOWN',
         WARN:   'LOG_WARN_ALINIT',
+        WARN+1: 'LOG_WARN_IGNORED',
         ERR-1:  'LOG_WARN_UNKNOWN',
         ERR:    'LOG_ERR_DATASIZE',
         ERR+1:  'LOG_ERR_MSGSIZE',
@@ -115,6 +116,7 @@ log_status = {
         INFO:   'PROF_INFO_OK',
         INFO+1: 'PROF_INFO_RESULTS',
         WARN-1: 'PROF_INFO_UNKNOWN',
+        WARN:   'PROF_WARN_ALINIT',
         ERR-1:  'PROF_WARN_UNKNOWN',
         END-1:  'PROF_ERR_UNKNOWN'
         
@@ -122,8 +124,9 @@ log_status = {
     'TEST': {
         INFO:   'TEST_INFO_OK',
         INFO+1: 'TEST_INFO_PASSED',
-        INFO+2: 'TEST_INFO_FAILED',
+        INFO+2: 'TEST_INFO_CONFIRM',
         WARN-1: 'TEST_INFO_UNKNOWN',
+        WARN: 'TEST_WARN_FAILED',
         ERR-1:  'TEST_WARN_UNKNOWN',
         END-1:  'TEST_ERR_UNKNOWN'
         
@@ -147,7 +150,7 @@ cmd_functions = {
 }
 
 # Serial port Baud rate
-BAUD_RATE = 115200
+BAUD_RATE = 460800
 
 # Serial port
 ser = serial.Serial()
@@ -163,8 +166,9 @@ serial_header_size = 3
 serial_msg_size = 0
 serial_data_size = 0
 serial_list = []#b''
-serial_timeout = 1.0
+serial_timeout = 5.0
 serial_start_time = 0
+serial_buffer = b''
 
 # Serial flag to block on transmit
 serial_rx = True
@@ -280,7 +284,7 @@ def open_com():
             valid_port = False
             pass
 
-    ser = serial.Serial(com_list[usr_input], BAUD_RATE)
+    ser = serial.Serial(com_list[usr_input], BAUD_RATE, timeout=1.0)
     print_info("Serial port " + ser.name + " opened at " + str(BAUD_RATE) + " Baud.")
 
     print_info("Creating STLINK-V2 connection.")
@@ -324,10 +328,15 @@ def proc_stlink():
 def proc_read_serial():
     global ser
     global serial_rx
+    global serial_buffer
+    #ser.readinto(serial_array)
+    #print(serial_array)
+    #print(len(serial_array))
     while True:
-        if serial_rx == True and not ser.inWaiting() == 0:
-            q_serial.put(ser.read(ser.inWaiting()))
-
+        if serial_rx == True and not ser.in_waiting == 0:
+            #q_serial.put(ser.read(32))
+            serial_buffer += ser.read(ser.in_waiting)
+            print(len(serial_buffer))
 def proc_read_input():
     while True:
         i = None
@@ -450,6 +459,7 @@ def cmd_debug_stop():
 
 def cmd_debug_restart():
     cmd_debug_stop()
+    time.sleep(1);
     cmd_debug_start()
 
 
@@ -565,7 +575,7 @@ def serial_parse_log(d):
 
 #    data = int.from_bytes(data, byteorder='little')
 
-    print(d)
+#    print(d)
 
     global serial_count
     global serial_msg_size

@@ -523,7 +523,6 @@ ov5642_status_t ov5642_Configure() {
 
 ov5642_status_t ov5642_Capture() {
     DCMI_CaptureCmd(ENABLE);
-    volatile uint32_t a = DCMI->CR;
     return OV5642_INFO_OK;
 }
 

@@ -91,9 +91,9 @@
   *-----------------------------------------------------------------------------
   *        System Clock source                    | PLL (HSE)
   *-----------------------------------------------------------------------------
-  *        SYSCLK(Hz)                             | 180000000
+  *        SYSCLK(Hz)                             | 180000000 -- 96000000 FOR DISCOVERY
   *-----------------------------------------------------------------------------
-  *        HCLK(Hz)                               | 180000000
+  *        HCLK(Hz)                               | 180000000 -- 96000000 FOR DISCOVERY
   *-----------------------------------------------------------------------------
   *        AHB Prescaler                          | 1
   *-----------------------------------------------------------------------------
@@ -101,9 +101,9 @@
   *-----------------------------------------------------------------------------
   *        APB2 Prescaler                         | 2
   *-----------------------------------------------------------------------------
-  *        HSE Frequency(Hz)                      | 25000000
+  *        HSE Frequency(Hz)                      | 25000000 - 8000000 FOR DISCOVERY BOARD
   *-----------------------------------------------------------------------------
-  *        PLL_M                                  | 25
+  *        PLL_M                                  | 25 -- 8 FOR DISCOVERY BOARD
   *-----------------------------------------------------------------------------
   *        PLL_N                                  | 360
   *-----------------------------------------------------------------------------
@@ -368,7 +368,7 @@
 /************************* PLL Parameters *************************************/
 #if defined(STM32F40_41xxx) || defined(STM32F427_437xx) || defined(STM32F429_439xx) || defined(STM32F401xx) || defined(STM32F469_479xx)
  /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N */
- #define PLL_M      25
+ #define PLL_M      8 //25
 #elif defined(STM32F412xG) || defined (STM32F446xx)
  #define PLL_M      8
 #elif defined (STM32F410xx) || defined (STM32F411xE)
@@ -392,7 +392,7 @@
 #endif /* STM32F446xx */ 
 
 #if defined(STM32F427_437xx) || defined(STM32F429_439xx) || defined(STM32F446xx) || defined(STM32F469_479xx)
-#define PLL_N      360
+#define PLL_N      192 //360
 /* SYSCLK = PLL_VCO / PLL_P */
 #define PLL_P      2
 #endif /* STM32F427_437x || STM32F429_439xx || STM32F446xx || STM32F469_479xx */
@@ -804,7 +804,7 @@ static void SetSysClock(void)
     /* Configure the main PLL */
     RCC->PLLCFGR = PLL_M | (PLL_N << 6) | (((PLL_P >> 1) -1) << 16) |
                    (RCC_PLLCFGR_PLLSRC_HSE) | (PLL_Q << 24);
-    
+
     /* Enable the main PLL */
     RCC->CR |= RCC_CR_PLLON;
 
