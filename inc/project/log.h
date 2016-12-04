@@ -25,7 +25,7 @@
 
 #define LOG_MAXMSGSIZE 255
 #define LOG_MAXDATASIZE 16777216
-#define LOG_BAUDRATE 460800
+#define LOG_BAUDRATE 921600
 
 /** @brief Type for log packets
  */

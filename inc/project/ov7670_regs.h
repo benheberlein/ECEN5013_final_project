@@ -172,8 +172,38 @@ typedef struct __attribute__ ((packed)) ov7670_reg_s {
 #define REG_HAECC7	0xaa	/* Hist AEC/AGC control 7 */
 #define REG_BD60MAX	0xab	/* 60hz banding step limit */
 
+const static ov7670_reg_t ov7670_VGA_YUV_regs[] = {
+    // VGA mode for 24Mhz, YUV
+    // from https://www.fer.unizg.hr/_download/repository/OV7670new.pdf
+    {REG_COM7, 0x00},
+    {REG_CLKRC, 0x01},
+    {REG_COM3, 0x00},
+    {REG_COM14, 0x00},
+    {0x70, 0x3a},
+    {0x71, 0x35},
+    {0x72, 0x11},
+    {0x73, 0xf0},
+    {0xa2, 0x02}, 
+};
+
+const static ov7670_reg_t ov7670_QVGA_YUV_regs[] = {
+    // QVGA mode for 24Mhz, YUV
+    // from https://www.fer.unizg.hr/_download/repository/OV7670new.pdf
+    {REG_COM7, 0x00},
+    {REG_CLKRC, 0x01},
+    {REG_COM3, 0x04},
+    {REG_COM14, 0x19},
+    {0x70, 0x3a},
+    {0x71, 0x35},
+    {0x72, 0x11},
+    {0x73, 0xf1},
+    {0xa2, 0x02}, 
+
+    {0xff, 0xff}
+};
+
 const static ov7670_reg_t ov7670_default_regs[] = {
-	/* { REG_COM7, COM7_RESET }, -> we use HW reset */
+	//{ REG_COM7, COM7_RESET },
 
 	{ REG_CLKRC, 0x1 },	/* OV: PCLK = XCLK / 2 */
 	{ REG_TSLB,  0x04 },	/* OV */

@@ -40,10 +40,6 @@
  */
 
 int main() {
-    RCC_ClocksTypeDef RCC_ClocksStatus;
-    RCC_GetClocksFreq(&RCC_ClocksStatus);
-    uint32_t r = RCC_ClocksStatus.PCLK2_Frequency;
-
 
     #ifdef __TEST
     #ifdef __LOG
@@ -114,9 +110,9 @@ int main() {
         log_Log(OV7670, ov_st, "Coud not initialize OV7670.\0");
     }
 
-//    ov_st = ov7670_Configure();
+    ov_st = ov7670_Configure();
 
-//    ov_st = ov7670_Capture();
+    ov_st = ov7670_Capture();
 
     ov_st = ov7670_Transfer();
     #endif

@@ -21,7 +21,7 @@
 #include "mod.h"
 
 #define CMD_QUEUE_CAP 256
-#define CMD_BAUDRATE 460800
+#define CMD_BAUDRATE 921600
 
 /* @brief general function that other function enums
  * can be cast to

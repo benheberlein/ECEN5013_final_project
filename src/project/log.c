@@ -130,7 +130,7 @@ log_status_t log_send(log_packet_t *log_packet) {
         while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) {}
         // Delay
         if (i % 100 == 0) {
-            for (uint32_t j = 0; j < 100000; j++) {}
+            for (uint32_t j = 0; j < 100; j++) {}
         }
         USART_SendData(USART2, *(log_packet->log_packet_data+i));
         i++;
@@ -146,7 +146,7 @@ log_status_t log_send(log_packet_t *log_packet) {
 
 #ifdef __LOG
 log_status_t log_Init() {
-
+    
     if (log_initialized == 1) {
         return LOG_WARN_ALINIT;
     }

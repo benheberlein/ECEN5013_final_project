@@ -76,11 +76,11 @@ ov7670_status_t ov7670_dmaInit() {
     dmaInit.DMA_PeripheralBaseAddr = OV7670_DCMI_PERIPHADDR;
     dmaInit.DMA_Memory0BaseAddr = (uint32_t) SDRAM_IMAGEADDR;
     dmaInit.DMA_DIR = DMA_DIR_PeripheralToMemory;
-    dmaInit.DMA_BufferSize = 640*480/4;//OV7670_DMA_BUFSIZE;
+    dmaInit.DMA_BufferSize = OV7670_IMAGE_BUFSIZE/ 4;
     dmaInit.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
     dmaInit.DMA_MemoryInc = DMA_MemoryInc_Enable;
     dmaInit.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
-    dmaInit.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    dmaInit.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;
     dmaInit.DMA_Mode = DMA_Mode_Circular;
     dmaInit.DMA_Priority = DMA_Priority_High;
     dmaInit.DMA_FIFOMode = DMA_FIFOMode_Enable;
@@ -497,12 +497,7 @@ ov7670_status_t ov7670_Init() {
 }
 
 ov7670_status_t ov7670_Configure() {
-    ov7670_status_t ret = ov7670_regWriteArray(ov7670_default_regs);
-    if (ret != OV7670_INFO_OK) {
-        log_Log(OV7670, ret, "Could not configure OV7670 registers.\0");
-        return ret;
-    }
-    ret = ov7670_regWriteArray(ov7670_fmt_raw);
+    ov7670_status_t ret = ov7670_regWriteArray(ov7670_QVGA_YUV_regs);
     if (ret != OV7670_INFO_OK) {
         log_Log(OV7670, ret, "Could not configure OV7670 registers.\0");
         return ret;
@@ -518,7 +513,8 @@ ov7670_status_t ov7670_Capture() {
 
 ov7670_status_t ov7670_Transfer() {
     log_Log(OV7670, OV7670_INFO_OK, "Beginning image transfer.\0");
-    log_Log(OV7670, OV7670_INFO_IMAGE, "\0", 640*480, (uint8_t *) SDRAM_IMAGEADDR);
+    log_Log(OV7670, OV7670_INFO_IMAGE, "\0", OV7670_IMAGE_BUFSIZE, (uint8_t *) SDRAM_IMAGEADDR);
+    
 
     return OV7670_INFO_OK;
 }

@@ -51,12 +51,12 @@ char * test_prof_Profile() {
     
     prof_Profile(
         for (int i = 0; i < 1000; i++) {},
-        "Test loop 1000\0"
+        "Test loop 1000\t\0"
     );
 
     prof_Profile(
         for (int i = 0; i < 10000; i++) {},
-        "Test loop 10000\0"
+        "Test loop 10000\t\0"
     );
 
     prof_Profile(

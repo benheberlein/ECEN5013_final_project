@@ -13,6 +13,8 @@ import time
 import signal
 import struct
 import gc
+import fifo
+from PIL import Image
 
 # Module definitions
 # KEEP IN SYNC WITH C CODE
@@ -150,13 +152,12 @@ cmd_functions = {
 }
 
 # Serial port Baud rate
-BAUD_RATE = 460800
+BAUD_RATE = 921600
 
 # Serial port
 ser = serial.Serial()
 
-# Serial Rx queue
-q_serial = queue.Queue()
+# Serial Rx data
 q_list = b''
 
 # Serial command byte count and sizes
@@ -165,10 +166,11 @@ serial_total = 7
 serial_header_size = 3
 serial_msg_size = 0
 serial_data_size = 0
-serial_list = []#b''
-serial_timeout = 5.0
+serial_list = b''
+serial_timeout = 1.0
 serial_start_time = 0
-serial_buffer = b''
+serial_fifo = fifo.BytesFIFO(640*480*2)
+serial_data_flag = 0
 
 # Serial flag to block on transmit
 serial_rx = True
@@ -328,15 +330,11 @@ def proc_stlink():
 def proc_read_serial():
     global ser
     global serial_rx
-    global serial_buffer
-    #ser.readinto(serial_array)
-    #print(serial_array)
-    #print(len(serial_array))
+    temp = 0
     while True:
         if serial_rx == True and not ser.in_waiting == 0:
-            #q_serial.put(ser.read(32))
-            serial_buffer += ser.read(ser.in_waiting)
-            print(len(serial_buffer))
+            serial_fifo.write(ser.read(ser.in_waiting))
+
 def proc_read_input():
     while True:
         i = None
@@ -475,23 +473,21 @@ def serial_reset():
     global serial_list
     global serial_start_time
     global serial_header_size
-
-    print("restting with " + str(serial_count) + " as serial count")
+    global serial_data_flag
 
     serial_header_size = 3
     serial_data_size = 0
     serial_msg_size = 0
     serial_count = 0
     serial_total = 7
-    serial_list = []#b''
+    serial_list = b''
     serial_start_time = 0
     serial_rx = True;
-
-    print("reset")
+    serial_data_flag = 0
 
 def serial_handle_image(l):
     string = ""
-    string += log_modules[l[0]]
+    string += log_modules[l[0]] + ":\t"
     string += log_status[log_modules[l[0]]][l[1]]
 
     if l[2] != 0:
@@ -512,6 +508,17 @@ def serial_handle_image(l):
             f.write(bytes(l[l[2]+7:]))
 
         print_info("\tSaved image to data folder.")
+        print_info("\tProcessing image for display.")
+
+        f.close()
+
+        g = b''
+        for i in range(0,len(l[l[2]+7:]),2):
+            g += bytes([l[l[2]+7+i]])
+
+        print_info("\tDisplaying image.")
+        im = Image.frombytes("L", (320,240), g)
+        im.show()
 
     else:
         print_error("\tImage sent without data packet!")
@@ -568,15 +575,9 @@ def serial_print_log(l):
         print_error("Check that the previous call to logger terminated its message with a '\\0'");
 
 def serial_parse_log(d):
-    serial_start_time = time.time()
 
     global serial_rx
-#    serial_rx = False
-
-#    data = int.from_bytes(data, byteorder='little')
-
-#    print(d)
-
+    
     global serial_count
     global serial_msg_size
     global serial_total
@@ -585,43 +586,51 @@ def serial_parse_log(d):
     global serial_data_size
     global serial_start_time
     global serial_timeout
+    global serial_data_flag
 
-#    if serial_count > serial_msg_size + serial_header_size + 4:
-#        serial_count += len(d)
-#        serial_list += d
-#    else:
-
-#        d_count = 0 
+    if (serial_data_flag == 1):
+        # Just get all data, don't look at it
     
-    for data in d:
-        serial_count += 1
-        #d_count += 1
+        serial_start_time = time.time()
 
-        serial_list.append(data) #+= bytes([data])
-
-        if serial_count == serial_header_size:
-            serial_msg_size = data
-            serial_total += data
-            print(serial_total)
-
-        if serial_count == serial_msg_size + serial_header_size + 1:
-            serial_data_size += data
-        elif serial_count == serial_msg_size + serial_header_size + 2:
-            serial_data_size += (data << 8)
-        elif serial_count == serial_msg_size + serial_header_size + 3:
-            serial_data_size += (data << 16)
-        elif serial_count == serial_msg_size + serial_header_size + 4:
-            serial_data_size += (data << 24)
-            serial_total += serial_data_size
-            print(serial_total)
-        #        break
-            print("Data size:")
-            print(serial_data_size)
-            
-
-        if serial_count == serial_total:
-            print("serial print log")
+        if len(d) >= serial_total - serial_count:
+            serial_list += d[0:serial_total - serial_count]
+            serial_count += serial_total - serial_count
             serial_print_log(serial_list)
+            if (d[serial_total - serial_count:] != ''):
+                serial_parse_log(d[serial_total - serial_count:])
+        else:
+            serial_count += len(d)
+            serial_list += d
+
+    else:
+
+        for data in d:
+            serial_count += 1
+
+            serial_start_time = time.time()
+        
+            serial_list += bytes([data])
+
+            if serial_count == serial_header_size:
+                serial_msg_size = data
+                serial_total += data
+
+            if serial_count == serial_msg_size + serial_header_size + 1:
+                serial_data_size += data
+            elif serial_count == serial_msg_size + serial_header_size + 2:
+                serial_data_size += (data << 8)
+            elif serial_count == serial_msg_size + serial_header_size + 3:
+                serial_data_size += (data << 16)
+            elif serial_count == serial_msg_size + serial_header_size + 4:
+                serial_data_size += (data << 24)
+                serial_total += serial_data_size
+                serial_data_flag = 1
+
+            if serial_count == serial_total:
+                serial_print_log(serial_list)
+
+    
 
 #######################################
 
@@ -633,12 +642,16 @@ def main():
     init()
     serial_reset()
     
+    global serial_written
+    global serial_fifo
+
     # Main processing loop
     while True:
         if not serial_start_time == 0 and time.time() > serial_start_time + serial_timeout:
             serial_reset()
-        if not q_serial.empty():
-            serial_parse_log(q_serial.get())
+            print_warning("Logger reset after timeout.")
+        if not serial_fifo.empty():
+            serial_parse_log(serial_fifo.read(len(serial_fifo)))
         if not q_input.empty():
             cmd_parse_input(q_input.get())
 

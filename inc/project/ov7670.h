@@ -26,9 +26,9 @@
 #define OV7670_DCMI_OFFSETDR 0x28
 #define OV7670_DCMI_PERIPHADDR (OV7670_DCMI_BASEADDR | OV7670_DCMI_OFFSETDR)
 
-/* @brief DMA Transfer size
+/* @brief Image transfer size
  */
-#define OV7670_DMA_BUFSIZE 320*240/4*2
+#define OV7670_IMAGE_BUFSIZE 320*240*2
 
 /* @brief I2C clock speed
  */
