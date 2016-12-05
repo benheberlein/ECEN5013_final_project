@@ -195,14 +195,17 @@ const static ov7670_reg_t ov7670_VGA_YUV_regs[] = {
 const static ov7670_reg_t ov7670_QVGA_YUV_regs[] = {
     // QVGA mode for 24Mhz, YUV
     // from https://www.fer.unizg.hr/_download/repository/OV7670new.pdf
-    
+   
+    {0x6b, 0x8a},
+    {0x11,0x07},
+
     {REG_COM7, 0x10},
     
     {0x32, 0xb3},
     {0x17, 0x0c},
     {0x18, 0x61},
 
-    {0xff, 0xff},
+    {0xff, 0xff}
 };
 
 const static ov7670_reg_t ov7670_default_regs[] = {

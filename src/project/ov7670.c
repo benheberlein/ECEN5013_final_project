@@ -33,6 +33,24 @@
 
 ov7670_status_t ov7670_clockInit() {
     GPIO_InitTypeDef gpioInit;
+#if 0    
+    // Configure for 24MHz clock
+    RCC_MCO2Config(RCC_MCO2Source_SYSCLK, RCC_MCO2Div_4);
+
+    // Enable GPIO clock
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+    
+    // Map alternate function 
+    GPIO_PinAFConfig(GPIOC, GPIO_PinSource9, GPIO_AF_MCO);
+
+    // Configure PC9
+    gpioInit.GPIO_OType = GPIO_OType_PP;
+    gpioInit.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    gpioInit.GPIO_Mode = GPIO_Mode_AF;
+    gpioInit.GPIO_Pin = GPIO_Pin_9;
+    gpioInit.GPIO_Speed = GPIO_Low_Speed;
+    GPIO_Init(GPIOC, &gpioInit);
+#endif
 
     // Enable HSI clock
     RCC_HSICmd(ENABLE);
@@ -42,7 +60,7 @@ ov7670_status_t ov7670_clockInit() {
 
     // Enable GPIO clock
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-
+    
     // Map alternate function 
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_MCO);
 
@@ -51,7 +69,7 @@ ov7670_status_t ov7670_clockInit() {
     gpioInit.GPIO_PuPd = GPIO_PuPd_NOPULL;
     gpioInit.GPIO_Mode = GPIO_Mode_AF;
     gpioInit.GPIO_Pin = GPIO_Pin_8;
-    gpioInit.GPIO_Speed = GPIO_High_Speed;
+    gpioInit.GPIO_Speed = GPIO_Medium_Speed;
     GPIO_Init(GPIOA, &gpioInit);
 
     return OV7670_INFO_OK;
@@ -110,7 +128,7 @@ ov7670_status_t ov7670_dcmiInit() {
      * D6       | PB8
      * D5       | PD3
      * D4       | PC11
-     * D3       | PC9
+     * D3       | PE1
      * D2       | PC8
      * D1       | PC7
      * D0       | PC6
@@ -120,7 +138,8 @@ ov7670_status_t ov7670_dcmiInit() {
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA |
                            RCC_AHB1Periph_GPIOB |
                            RCC_AHB1Periph_GPIOC |
-                           RCC_AHB1Periph_GPIOD, 
+                           RCC_AHB1Periph_GPIOD |
+                           RCC_AHB1Periph_GPIOE,
                            ENABLE);
 
     // Send clock to DCMI
@@ -159,8 +178,7 @@ ov7670_status_t ov7670_dcmiInit() {
     GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_DCMI); // D4
     
     gpioInit.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 |
-                        GPIO_Pin_8 | GPIO_Pin_9 |
-                        GPIO_Pin_11;
+                        GPIO_Pin_8 | GPIO_Pin_11 | GPIO_Pin_9; 
     gpioInit.GPIO_Mode = GPIO_Mode_AF;
     gpioInit.GPIO_Speed = GPIO_High_Speed;
     gpioInit.GPIO_OType = GPIO_OType_PP;
@@ -178,7 +196,18 @@ ov7670_status_t ov7670_dcmiInit() {
     gpioInit.GPIO_PuPd = GPIO_PuPd_UP;
 
     GPIO_Init(GPIOD, &gpioInit); 
+#if 0
+    // Port E 
+    GPIO_PinAFConfig(GPIOE, GPIO_PinSource1, GPIO_AF_DCMI); // D3
 
+    gpioInit.GPIO_Pin = GPIO_Pin_1;
+    gpioInit.GPIO_Mode = GPIO_Mode_AF;
+    gpioInit.GPIO_Speed = GPIO_High_Speed;
+    gpioInit.GPIO_OType = GPIO_OType_PP;
+    gpioInit.GPIO_PuPd = GPIO_PuPd_UP;
+
+    GPIO_Init(GPIOE, &gpioInit); 
+#endif
     // Initialize DCMI
     DCMI_InitTypeDef dcmiInit;
 
@@ -451,6 +480,9 @@ ov7670_status_t ov7670_regWriteArray(const ov7670_reg_t *reg) {
             log_Log(OV7670, ret, "Couldn't write OV7670 register array.\0");
             return ret;
         }
+
+        // Wait
+        for (uint32_t i = 0; i < 10000; i++) {}
 
         // Increase register pointer
         reg++;
