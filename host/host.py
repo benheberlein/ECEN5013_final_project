@@ -513,7 +513,7 @@ def serial_handle_image(l):
         f.close()
 
         g = b''
-        for i in range(0,len(l[l[2]+7:]),2):
+        for i in range(1,len(l[l[2]+7:]),2):
             g += bytes([l[l[2]+7+i]])
 
         print_info("\tDisplaying image.")
