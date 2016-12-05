@@ -52,6 +52,39 @@ typedef enum sdram_func_e {
     SDRAM_FUNC_INIT,   
 } sdram_func_t;
 
+/* @brief ov5642 functions
+ */
+typedef enum ov5642_func_e {
+    ov5642_FUNC_DUMMY,   
+} ov5642_func_t;
+
+/* @brief ov7670 functions
+ */
+typedef enum ov7670_func_e {
+    OV7670_FUNC_DUMMY,   
+} ov7670_func_t;
+
+/* @brief profiler functions
+ */
+typedef enum prof_func_e {
+    PROF_FUNC_INIT,   
+} prof_func_t;
+
+/* @brief test functions
+ */
+typedef enum test_func_e {
+    TEST_FUNC_DUMMY,   
+} test_func_t;
+
+/* @brief camera functions
+ */
+typedef enum cam_func_e {
+    CAM_FUNC_INIT,
+    CAM_FUNC_CONFIG,
+    CAM_FUNC_CAPTURE,
+    CAM_FUNC_TRANSFER,   
+} cam_func_t;
+
 /* @brief command structure
  */
 typedef struct __attribute__ ((packed)) cmd_cmd_s {

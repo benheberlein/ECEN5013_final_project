@@ -15,6 +15,8 @@
 #include "cmd.h"
 #include "err.h"
 #include "sdram.h"
+#include "cam.h"
+#include "prof.h"
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_rcc.h"
 #include <stdint.h>
@@ -415,7 +417,7 @@ cmd_status_t cmd_Loop() {
                 #ifdef __LOG
                 case LOG_FUNC_INIT:
                     if (cmd->cmd_data != 0) {
-                        log_Log(CMD, CMD_ERR_DATA, "Initalization command should not have data.\0");
+                        log_Log(CMD, CMD_ERR_DATA, "Initialization command should not have data.\0");
                     }
                     log_status_t log_st = log_Init();
                     if (log_st == LOG_INFO_OK) {
@@ -445,9 +447,9 @@ cmd_status_t cmd_Loop() {
                     if (cmd_st == CMD_INFO_OK) {
                         log_Log(CMD, CMD_INFO_OK, "Initialized command module.\0");
                     } else if (cmd_st == CMD_WARN_ALINIT) {
-                        log_Log(CMD, CMD_WARN_ALINIT, "Command module alredy initialized.\0");
+                        log_Log(CMD, CMD_WARN_ALINIT, "Command module already initialized.\0");
                     } else {
-                        log_Log(CMD, cmd_st, "Failed to initialize log");
+                        log_Log(CMD, cmd_st, "Failed to initialize log\0");
                     }                    
                     break;
                 default:
@@ -467,15 +469,15 @@ cmd_status_t cmd_Loop() {
             switch (cmd->cmd_func) {
                 case SDRAM_FUNC_INIT:
                     if (cmd->cmd_data != 0) {
-                        log_Log(CMD, CMD_ERR_DATA, "Initalization command should not have data.\0");
+                        log_Log(CMD, CMD_ERR_DATA, "Initialization command should not have data.\0");
                     }
                     sdram_status_t sd_st = sdram_Init();
                     if (sd_st == SDRAM_INFO_OK) {
                         log_Log(SDRAM, SDRAM_INFO_OK, "Initialized SDRAM interface.\0");
                     } else if (sd_st == SDRAM_WARN_ALINIT) {
-                        log_Log(SDRAM, SDRAM_WARN_ALINIT, "SDRAM alredy initialized.\0");
+                        log_Log(SDRAM, SDRAM_WARN_ALINIT, "SDRAM already initialized.\0");
                     } else {
-                        log_Log(SDRAM, sd_st, "Failed to initialize SDRAM.");
+                        log_Log(SDRAM, sd_st, "Failed to initialize SDRAM.\0");
                     }                    
                     break;
                 default:
@@ -485,6 +487,106 @@ cmd_status_t cmd_Loop() {
  
             }
             break;
+        case PROF:
+            switch (cmd->cmd_func) {
+                case PROF_FUNC_INIT:
+                    if (cmd->cmd_data != 0) {
+                        log_Log(CMD, CMD_ERR_DATA, "Initialization command should not have data.\0");
+                    }
+                    prof_status_t p_st = prof_Init();
+                    if (p_st == PROF_INFO_OK) {
+                        log_Log(PROF, PROF_INFO_OK, "Initialized profiler.\0");
+                    } else if (p_st == PROF_WARN_ALINIT) {
+                        log_Log(PROF, PROF_WARN_ALINIT, "Profiler already initialized.\0");
+                    } else {
+                        log_Log(PROF, p_st, "Failed to initialize profiler.\0");
+                    }                    
+                    break;
+                default:
+                    log_Log(CMD, CMD_ERR_NOFUNC, "Tried to call a profiler function that doesn't exist.\0", 
+                            1, &(cmd->cmd_func));
+                    break;
+            }
+            break;
+        case CAM:
+            switch (cmd->cmd_func) {
+                case CAM_FUNC_INIT:
+                    if (cmd->cmd_data != 0) {
+                        log_Log(CMD, CMD_ERR_DATA, "Initialization command should not have data.\0");
+                    }
+                    cam_status_t c_st = cam_Init();
+                    if (c_st == CAM_INFO_OK) {
+                        log_Log(CAM, CAM_INFO_OK, "Initialized camera module.\0");
+                    } else if (c_st == CAM_WARN_ALINIT) {
+                        log_Log(CAM, CAM_WARN_ALINIT, "Camera module already initialized.\0");
+                    } else {
+                        log_Log(CAM, c_st, "Failed to initialize camera.\0");
+                    }                    
+                    break;
+                case CAM_FUNC_CONFIG:
+                    if (cmd->cmd_data != 0) {
+                        log_Log(CMD, CMD_ERR_DATA, "Configuration command should not have data.\0");
+                    }
+                    c_st = cam_Configure();
+                    if (c_st == CAM_INFO_OK) {
+                        log_Log(CAM, CAM_INFO_OK, "Configured camera module.\0");
+                    } else if (c_st == CAM_WARN_ALCONF) {
+                        log_Log(CAM, CAM_WARN_ALCONF, "Camera module already configured.\0");
+                    } else {
+                        log_Log(CAM, c_st, "Failed to configure camera.\0");
+                    }                    
+                    break;
+                case CAM_FUNC_CAPTURE:
+                    if (cmd->cmd_data != 0) {
+                        log_Log(CMD, CMD_ERR_DATA, "Camera capture command should not have data.\0");
+                    }
+                    c_st = cam_Capture();
+                    if (c_st == CAM_INFO_OK) {
+                        log_Log(CAM, CAM_INFO_OK, "Captured an image into SDRAM.\0");
+                    } else {
+                        log_Log(CAM, c_st, "Could not capture image.\0");
+                    }                    
+                    break;
+                case CAM_FUNC_TRANSFER:
+                    if (cmd->cmd_data != 0) {
+                        log_Log(CMD, CMD_ERR_DATA, "Camera transfer command should not have data.\0");
+                    }
+                    c_st = cam_Transfer();
+                    if (c_st == CAM_INFO_OK) {
+                        log_Log(CAM, CAM_INFO_OK, "Successfully transferred image.\0");
+                    } else {
+                        log_Log(CAM, c_st, "Could not transfer image to debug interface.\0");
+                    }                    
+                    break;
+                default:
+                    log_Log(CMD, CMD_ERR_NOFUNC, "Tried to call a camera function that doesn't exist.\0", 
+                            1, &(cmd->cmd_func));
+                    break;
+            }
+            break;
+        case TEST:
+            switch (cmd->cmd_func) {
+                default:
+                    log_Log(CMD, CMD_ERR_NOFUNC, "Tried to call a test function that doesn't exist.\0", 
+                            1, &(cmd->cmd_func));        
+                }
+                break;
+        case OV5642:
+            switch (cmd->cmd_func) {
+                default:
+                    log_Log(CMD, CMD_ERR_NOFUNC, "Tried to call an ov5642 function that doesn't exist.\0", 
+                            1, &(cmd->cmd_func));        
+                }
+                break;
+         case OV7670:
+            switch (cmd->cmd_func) {
+                default:
+                    log_Log(CMD, CMD_ERR_NOFUNC, "Tried to call an 0v7670 function that doesn't exist.\0", 
+                            1, &(cmd->cmd_func));        
+                }
+                break;
+
+
         default:
             log_Log(CMD, CMD_ERR_NOMOD, "Tried to send a command to an unknown module.\0");
             break;

@@ -27,6 +27,7 @@ log_modules = {
     5: 'OV7670',
     6: 'PROF',
     7: 'TEST',
+    8: 'CAM',
 }
 
 # reversed for easier sending
@@ -39,6 +40,7 @@ cmd_modules = {
     'OV7670': 5,
     'PROF':   6,
     'TEST':   7,
+    'CAM':    8,
 }
 
 # Error definitions
@@ -128,10 +130,22 @@ log_status = {
         INFO+1: 'TEST_INFO_PASSED',
         INFO+2: 'TEST_INFO_CONFIRM',
         WARN-1: 'TEST_INFO_UNKNOWN',
-        WARN: 'TEST_WARN_FAILED',
+        WARN:   'TEST_WARN_FAILED',
         ERR-1:  'TEST_WARN_UNKNOWN',
         END-1:  'TEST_ERR_UNKNOWN'
-        
+    },
+    'CAM': {
+        INFO:   'CAM_INFO_OK',
+        INFO+1: 'CAM_INFO_IMAGE',
+        WARN-1: 'CAM_INFO_UNKNOWN',
+        WARN:   'CAM_WARN_ALINIT',
+        WARN:   'CAM_WARN_ALCONF',
+        ERR-1:  'CAM_WARN_UNKNOWN',
+        ERR:    'CAM_ERR_INIT',
+        ERR+1:  'CAM_ERR_CONFIG',
+        ERR+2:  'CAM_ERR_CAPTURE',
+        ERR+3:  'CAM_ERR_TRANSFER',
+        END-1:  'CAM_ERR_UNKNOWN',
     }
 
 }
@@ -148,6 +162,24 @@ cmd_functions = {
     },
     'SDRAM': {
         'SDRAM_FUNC_INIT': 0,
+    },
+    'OV5642': {
+        'OV5642_FUNC_DUMMY': 0,
+    },
+    'OV7670': {
+        'OV7670_FUNC_DUMMY': 0,
+    },
+    'PROF': {
+        'PROF_FUNC_INIT': 0,
+    },
+    'TEST': {
+        'TEST_FUNC_DUMMY': 0,
+    },
+    'CAM': {
+        'CAM_FUNC_INIT':     0,
+        'CAM_FUNC_CONFIG':   1,
+        'CAM_FUNC_CAPTURE':  2,
+        'CAM_FUNC_TRANSFER': 3,
     }
 }
 
@@ -404,6 +436,14 @@ def cmd_parse_input(cmd):
         cmd_send("CMD", "CMD_FUNC_INIT", 0, 0)
     elif cmd == "sdram init":
         cmd_send("SDRAM", "SDRAM_FUNC_INIT", 0, 0)
+    elif cmd == "cam init":
+        cmd_send("CAM", "CAM_FUNC_INIT", 0, 0)
+    elif cmd == "cam config":
+        cmd_send("CAM", "CAM_FUNC_CONFIG", 0, 0)
+    elif cmd == "cam capture":
+        cmd_send("CAM", "CAM_FUNC_CAPTURE", 0, 0)
+    elif cmd == "cam transfer":
+        cmd_send("CAM", "CAM_FUNC_TRANSFER", 0, 0)
     else:
         print_warning("Invalid command. Type 'help' to view a list of commands")
 
@@ -416,8 +456,11 @@ def cmd_help():
           "\t\trestart:\trestart a debug session\n" +
           "\tlog\tinit:\t\tinitialize the logger module\n" +
           "\tcmd\tinit:\t\tinitialize the command module\n" +
-          "\tsdram\tinit:\t\tinitialize the SDRAM interface")
-          
+          "\tsdram\tinit:\t\tinitialize the SDRAM interface\n" +
+          "\tcam\tinit:\t\tinitialize the camera module\n" +
+          "\tcam\tconfig:\t\tconfigure the camera module to take an image\n" +
+          "\tcam\tcapture:\tcapture an image with the camera module\n" +
+          "\tcam\ttransfer:\ttransfer an image to the debug interface")
 
 def cmd_stlink_restart():
     global p

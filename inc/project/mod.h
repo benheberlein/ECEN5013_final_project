@@ -26,6 +26,7 @@ typedef enum mod_e {
     OV7670,
     PROF,
     TEST,
+    CAM
 } mod_t;
 
 # endif /* __MOD_H */

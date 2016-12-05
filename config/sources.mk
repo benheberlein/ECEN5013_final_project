@@ -4,6 +4,7 @@ SRCS := main.c \
         cmd.c \
 		sdram.c \
 		prof.c \
+		cam.c \
 		\
         system_stm32f4xx.c \
         startup_stm32f429_439xx.s \

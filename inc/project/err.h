@@ -159,6 +159,24 @@ typedef enum test_status_e {
     TEST_ERR_UNKNOWN = END-1,
 } test_status_t;
 
+/* @brief Camera status
+ */
+typedef enum cam_status_e {
+    CAM_INFO_OK = INFO,
+    CAM_INFO_IMAGE = INFO+1,
+
+    CAM_INFO_UNKNOWN = WARN-1,
+
+    CAM_WARN_ALINIT = WARN,
+    CAM_WARN_ALCONF = WARN+1,
+    CAM_WARN_UNKNOWN = ERR-1,
+
+    CAM_ERR_INIT = ERR,
+    CAM_ERR_CONFIG = ERR+1,
+    CAM_ERR_CAPTURE = ERR+2,
+    CAM_ERR_TRANSFER = ERR+3,
+    CAM_ERR_UNKNOWN = END-1,
+} cam_status_t;
 
 /**************************************
  * @name Public functions

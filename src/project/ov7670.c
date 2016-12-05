@@ -547,6 +547,5 @@ ov7670_status_t ov7670_Transfer() {
     log_Log(OV7670, OV7670_INFO_OK, "Beginning image transfer.\0");
     log_Log(OV7670, OV7670_INFO_IMAGE, "\0", OV7670_IMAGE_BUFSIZE, (uint8_t *) SDRAM_IMAGEADDR);
     
-
     return OV7670_INFO_OK;
 }
