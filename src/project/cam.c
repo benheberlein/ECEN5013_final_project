@@ -23,6 +23,9 @@
 #ifdef __OV5642
 #include "ov5642.h"
 #endif
+#ifdef __WIFI
+#include "wifi.h"
+#endif
 #include <stdint.h>
 
 /* @brief Initialization flag
@@ -138,12 +141,28 @@ cam_status_t cam_Transfer() {
     }
     
     log_Log(CAM, CAM_INFO_OK, "Beginning image transfer.\0");
+
+    #ifdef __WIFI
+    
+    #ifdef __OV7670
+    wifi_Send(CAM, CAM_WARN_UNKNOWN, "abcdefghijuklmnopqrstuvwxyz\0", 0, 0);
+    wifi_Send(CAM, CAM_INFO_IMAGE, '\0', OV7670_IMAGE_BUFSIZE, (uint8_t *) SDRAM_IMAGEADDR);
+    #endif
+
+    #ifdef __OV5642
+    wifi_Send(CAM, CAM_INFO_IMAGE, '\0', OV5642_IMAGE_BUFSIZE, (uint8_t *) SDRAM_IMAGEADDR);
+    #endif
+
+    #else
+
     #ifdef __OV7670    
     log_Log(CAM, CAM_INFO_IMAGE, "\0", OV7670_IMAGE_BUFSIZE, (uint8_t *) SDRAM_IMAGEADDR);
     #endif
 
     #ifdef __OV5642
     log_Log(CAM, CAM_INFO_IMAGE, "\0", OV5642_IMAGE_BUFSIZE, (uint8_t *) SDRAM_IMAGEADDR);
+    #endif
+
     #endif
 
     return CAM_INFO_OK;

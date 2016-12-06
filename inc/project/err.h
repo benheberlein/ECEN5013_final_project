@@ -178,6 +178,33 @@ typedef enum cam_status_e {
     CAM_ERR_UNKNOWN = END-1,
 } cam_status_t;
 
+/* @brief ESP8266 status
+ */
+typedef enum esp8266_status_e {
+    ESP8266_INFO_OK = INFO,
+    ESP8266_INFO_UNKNOWN = WARN-1,
+
+    ESP8266_WARN_UNKNOWN = ERR-1,
+
+    ESP8266_ERR_UNKNOWN = END-1,
+} esp8266_status_t;
+
+/* @brief wifi status
+ */
+typedef enum wifi_status_e {
+    WIFI_INFO_OK = INFO,
+    WIFI_INFO_UNKNOWN = WARN-1,
+
+    WIFI_WARN_ALINIT = WARN,
+    WIFI_WARN_UNKNOWN = ERR-1,
+
+    WIFI_ERR_DATASIZE = ERR,
+    WIFI_ERR_MSGSIZE = ERR+1,
+    WIFI_ERR_SEND = ERR+2,
+    WIFI_ERR_INIT = ERR+3,
+    WIFI_ERR_UNKNOWN = END-1,
+} wifi_status_t;
+
 /**************************************
  * @name Public functions
  */
@@ -187,16 +214,14 @@ typedef enum cam_status_e {
  * @brief Reports the name of the source file and the 
  * source line number where the assert_param error has
  * occured. Used by the STM32f4xx standard peripheral
- * library to report issues
+ * library to report issues.
  *
  * @param  file: pointer to the source file name
  * @param  line: assert_param error line source number
  * @retval None
  */
 void assert_failed(uint8_t* file, uint32_t line) { 
-    
     log_Log(STDLIB, STDLIB_ERR_UNKNOWN, file, 4, &line);
-
 }
 #endif
 

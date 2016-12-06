@@ -128,7 +128,7 @@ ov7670_status_t ov7670_dcmiInit() {
      * D6       | PB8
      * D5       | PD3
      * D4       | PC11
-     * D3       | PE1
+     * D3       | PC9
      * D2       | PC8
      * D1       | PC7
      * D0       | PC6

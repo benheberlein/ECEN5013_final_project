@@ -26,7 +26,9 @@ typedef enum mod_e {
     OV7670,
     PROF,
     TEST,
-    CAM
+    CAM,
+    ESP8266,
+    WIFI,
 } mod_t;
 
 # endif /* __MOD_H */

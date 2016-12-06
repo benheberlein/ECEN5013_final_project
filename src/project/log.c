@@ -130,7 +130,8 @@ log_status_t log_send(log_packet_t *log_packet) {
         while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) {}
         // Delay
         if (i % 100 == 0) {
-            for (uint32_t j = 0; j < 100; j++) {}
+            // 100 cycles works fine for lab computer
+            for (uint32_t j = 0; j < 1000; j++) {}
         }
         USART_SendData(USART2, *(log_packet->log_packet_data+i));
         i++;
@@ -153,7 +154,7 @@ log_status_t log_Init() {
 
     GPIO_InitTypeDef GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
-
+   
     // Enable GPIO clock
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 

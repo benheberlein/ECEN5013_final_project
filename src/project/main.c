@@ -25,7 +25,11 @@
 #ifdef __TEST
 #include "test.h"
 #endif
+#ifdef __WIFI
+#include "wifi.h"
+#endif
 #include "cam.h"
+
 #include <stdint.h>
 
 /**************************************
@@ -102,6 +106,22 @@ int main() {
     } else {
         log_Log(CAM, cam_st, "Could not initialize camera module.\0");
     }
+
+    cam_st = cam_Configure();
+
+    #ifdef __WIFI
+    wifi_status_t w_st = wifi_Init();
+    if (w_st == WIFI_INFO_OK) {
+        log_Log(WIFI, WIFI_INFO_OK, "Initialized wifi module.\0");
+    } else if (w_st == WIFI_WARN_ALINIT) {
+        log_Log(WIFI, WIFI_WARN_ALINIT, "Wifi module already initialized.\0");
+    } else {
+        log_Log(WIFI, w_st, "Could not initialize wifi module.\0");
+    }
+    #endif
+
+    cam_Transfer();
+    cam_Transfer();
 
     // Start main loop
     cmd_status_t cmd_st = cmd_Loop();

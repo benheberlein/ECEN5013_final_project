@@ -34,9 +34,9 @@ TEST=TRUE
 CAMERA=OV5642
 
 # Wifi Module
-# Options are ESP8266
-# Default is ESP8266
-WIFI=ESP8266
+# Options are ESP8266, NONE
+# Default is NONE
+WIFI=NONE
 
 # Discovery board 
 # Options are STM32F429I_DISCOVERY
@@ -87,7 +87,7 @@ else
       endif
     endif
 
-    ifeq ($(PROF),TRUE)
+    ifeq ($(TEST),TRUE)
 	  COMP_FLAGS += __TEST
     else  
       ifneq ($(TEST),FALSE)
@@ -110,10 +110,12 @@ else
   endif
 endif
 
-ifeq ($(WIFI),ESP8266)
-  COMP_FLAGS += __ESP8266
-else
-  $(error Bad value for WIFI)
+ifneq ($(WIFI),NONE)
+  ifeq ($(WIFI),ESP8266)
+    COMP_FLAGS += __ESP8266 __WIFI
+  else
+    $(error Bad value for WIFI)
+  endif
 endif
 
 ifeq ($(BOARD),STM32F429I_DISCOVERY)

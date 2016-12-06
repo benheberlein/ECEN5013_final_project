@@ -59,6 +59,13 @@ else
   endif 
 endif
 
+ifneq ($(WIFI),NONE)
+  ifeq ($(WIFI),ESP8266)
+	SRCS += wifi.c \
+			esp8266.c
+  endif
+endif
+
 # Object files
 OBJS := $(SRCS:.c=.o)
 OBJS := $(OBJS:.s=.o)

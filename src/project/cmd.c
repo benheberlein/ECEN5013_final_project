@@ -564,6 +564,20 @@ cmd_status_t cmd_Loop() {
                     break;
             }
             break;
+        case ESP8266:
+            switch (cmd->cmd_func) {
+                default:
+                    log_Log(CMD, CMD_ERR_NOFUNC, "Tried to call an ESP8266 function that doesn't exist.\0", 
+                            1, &(cmd->cmd_func));        
+                }
+                break;
+        case WIFI:
+            switch (cmd->cmd_func) {
+                default:
+                    log_Log(CMD, CMD_ERR_NOFUNC, "Tried to call a wifi function that doesn't exist.\0", 
+                            1, &(cmd->cmd_func));        
+                }
+                break;
         case TEST:
             switch (cmd->cmd_func) {
                 default:

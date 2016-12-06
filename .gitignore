@@ -39,3 +39,6 @@ data/*
 
 # Image data
 *.raw
+
+# Other
+host/__pycache__/*
