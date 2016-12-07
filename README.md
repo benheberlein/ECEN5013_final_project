@@ -1,10 +1,18 @@
 # ECEN5013_final_project
-Final project for Embedded Software Essentials
+Final project for ECEN 5013 Embedded Software Essentials
+Designing a camera module interface for the STM32F429 
+
+This project integrates the STM32F429I-DISC1 board with an
+OV7670/OV5642 camera module and an ESP8266 wifi module.
+
+For full functional documentation, explore the doc folder.
+You will find documentation created by Doxygen and a final
+report on the system.
 
 PIN MAP
 
     /**********************************
-     * DCMI     | Pin   | OV5642 Pin
+     * DCMI     | Pin   | OVxxxx Pin
      * --------------------------------
      * VSYNC    | PB7   | 5
      * HSYNC    | PA4   | 6
@@ -20,14 +28,14 @@ PIN MAP
      *********************************/
      
     /**********************************
-     * I2C      | Pin   | OV5642 Pin
+     * I2C      | Pin   | OVxxxx Pin
      * --------------------------------
      * SCL      | PB10  | 3
      * SDA      | PB11  | 4
      *********************************/
     
     /**********************************
-     * MCO1     | Pin   | OV5642 Pin
+     * MCO1     | Pin   | OVxxxx Pin
      * --------------------------------
      * MCO1     | PA8   | 8
      *********************************/
@@ -45,3 +53,11 @@ PIN MAP
      * Red NC
      *********************************/
 
+    /**********************************
+     * UART 1 ESP8266   | Pin
+     * --------------------------------
+     * Tx               | A9
+     * --------------------------------
+     * Connect to GPIO13 (D7) on the 
+     * ESP8266 board
+     *********************************/

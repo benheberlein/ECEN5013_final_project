@@ -36,6 +36,8 @@
 bin/*
 build/*
 data/*
+doc/html/*
+doc/latex/*
 
 # Image data
 *.raw

@@ -7,7 +7,9 @@
  *  as 0-19, WARN enum values are reserved as 20-39, and
  *  ERR enum values are reserved as 40-59.
  *
- *  This file also implementst 
+ *  This file also handles the standard peripheral library
+ *  assertion failure by logging the failure to the debug
+ *  interface.
  *
  *  @author Ben Heberlein
  *  @bug No known bugs.

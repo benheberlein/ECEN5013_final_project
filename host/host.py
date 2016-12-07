@@ -228,7 +228,7 @@ serial_header_size = 3
 serial_msg_size = 0
 serial_data_size = 0
 serial_list = b''
-serial_timeout = 4.0
+serial_timeout = 1.0
 serial_start_time = 0
 serial_fifo = fifo.BytesFIFO(640*480*2)
 serial_data_flag = 0
@@ -369,13 +369,13 @@ def open_com():
 def open_socket():
     global sock
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.bind(('10.0.0.68', 8888))
-    sock.listen(1)
+#    sock.bind(('10.0.0.68', 8888))
+#    sock.listen(1)
 
-    global tt
-    tt = threading.Thread(target=proc_socket)
-    tt.daemon = True
-    tt.start()
+#    global tt
+#    tt = threading.Thread(target=proc_socket)
+#    tt.daemon = True
+#    tt.start()
 
 #######################################
 # Thread functions section
@@ -576,8 +576,6 @@ def serial_reset():
     global serial_header_size
     global serial_data_flag
 
-    print("resetting with count: " + str(serial_count))
-
     serial_header_size = 3
     serial_data_size = 0
     serial_msg_size = 0
@@ -728,8 +726,6 @@ def serial_parse_log(d):
             elif serial_count == serial_msg_size + serial_header_size + 4:
                 serial_data_size += (data << 24)
                 serial_total += serial_data_size
-                print("data size is " + str(serial_data_size))
-                print("total is " + str(serial_total))
                 serial_data_flag = 1
     
             if serial_count == serial_total:

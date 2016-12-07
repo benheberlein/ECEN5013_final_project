@@ -29,7 +29,7 @@ PROF=TRUE
 TEST=TRUE
 
 # Camera module
-# Options are OV5642
+# Options are OV5642, OV7670
 # Default is OV5642
 CAMERA=OV5642
 
@@ -194,6 +194,8 @@ $(BUILD_DIR)/%.s: %.s
 	@$ $(MKDIR_P) $(BUILD_DIR)
 	@$ $(CP) $< $(BUILD_DIR)
 
+# Clean build and bin folders
+.PHONY: clean
 clean:
 	@$ $(RM_F) $(BIN_DIR)/* $(BUILD_DIR)/*
 
