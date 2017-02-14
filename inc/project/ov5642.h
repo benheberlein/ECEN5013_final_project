@@ -28,7 +28,7 @@
 
 /* @brief DMA Transfer size
  */
-#define OV5642_IMAGE_BUFSIZE 65535
+#define OV5642_IMAGE_BUFSIZE 320*240*2
 
 /* @brief I2C clock speed
  */

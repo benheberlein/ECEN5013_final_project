@@ -1,4 +1,5 @@
 /** @file ov5642.c
+ * 
  *  @brief Implemenation of the ov5642 camera functions.
  *
  *  This file implements functionality of the ov5642
@@ -76,11 +77,11 @@ ov5642_status_t ov5642_dmaInit() {
     dmaInit.DMA_PeripheralBaseAddr = OV5642_DCMI_PERIPHADDR;
     dmaInit.DMA_Memory0BaseAddr = (uint32_t) SDRAM_IMAGEADDR;
     dmaInit.DMA_DIR = DMA_DIR_PeripheralToMemory;
-    dmaInit.DMA_BufferSize = 10;//OV5642_DMA_BUFSIZE;
+    dmaInit.DMA_BufferSize = OV5642_IMAGE_BUFSIZE / 4;
     dmaInit.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
     dmaInit.DMA_MemoryInc = DMA_MemoryInc_Enable;
     dmaInit.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
-    dmaInit.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    dmaInit.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;
     dmaInit.DMA_Mode = DMA_Mode_Circular;
     dmaInit.DMA_Priority = DMA_Priority_High;
     dmaInit.DMA_FIFOMode = DMA_FIFOMode_Enable;
@@ -513,11 +514,15 @@ ov5642_status_t ov5642_Init() {
 }
 
 ov5642_status_t ov5642_Configure() {
-    ov5642_status_t ret = ov5642_regWriteArray(ov5642_320x240);
+    ov5642_status_t ret = ov5642_regWriteArray(OV5642_QVGA_Preview);
     if (ret != OV5642_INFO_OK) {
         log_Log(OV5642, ret, "Could not configure OV5642 registers.\0");
         return ret;
     }
+/*    ret = ov5642_regWriteArray(ov5642_320x240);
+    if (ret != OV5642_INFO_OK) {
+        log_Log(OV5642, ret, "Could not configure OV5642 registers.\0");
+    }*/
     return OV5642_INFO_OK;
 }
 
@@ -528,7 +533,7 @@ ov5642_status_t ov5642_Capture() {
 
 ov5642_status_t ov5642_Transfer() {
     log_Log(OV5642, OV5642_INFO_OK, "Beginning image transfer.\0");
-    log_Log(OV5642, OV5642_INFO_IMAGE, "\0", 320*240, (uint8_t *) SDRAM_IMAGEADDR);
+    log_Log(OV5642, OV5642_INFO_IMAGE, "\0", OV5642_IMAGE_BUFSIZE, (uint8_t *) SDRAM_IMAGEADDR);
 
     return OV5642_INFO_OK;
 }
