@@ -22,9 +22,13 @@
 /* @brief Base address of DCMI module and offset of DR 
  * register for DMA requests.
  */
+#ifdef STM32F429I_DISCOVERY 
 #define OV5642_DCMI_BASEADDR ((uint32_t)0x50050000)
 #define OV5642_DCMI_OFFSETDR 0x28
 #define OV5642_DCMI_PERIPHADDR (OV5642_DCMI_BASEADDR | OV5642_DCMI_OFFSETDR)
+#endif
+#ifdef S0LENS_A
+#endif
 
 /* @brief DMA Transfer size
  */
@@ -78,7 +82,7 @@ ov5642_status_t ov5642_dmaInit();
 /** @brief Initialize the DCMI module
  *
  *  This function initializes and configures DCMI. The 
- *  following pin mapping is used.
+ *  following pin mapping is used for the discovery board.
  *
  *  DCMI     | Pin
  *  --------------------------------

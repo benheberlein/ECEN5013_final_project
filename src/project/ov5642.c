@@ -35,6 +35,8 @@
 ov5642_status_t ov5642_clockInit() {
     GPIO_InitTypeDef gpioInit;
 
+    #ifdef STM32F429I_DISCOVERY
+
     // Enable HSI clock
     RCC_HSICmd(ENABLE);
 
@@ -54,6 +56,12 @@ ov5642_status_t ov5642_clockInit() {
     gpioInit.GPIO_Pin = GPIO_Pin_8;
     gpioInit.GPIO_Speed = GPIO_High_Speed;
     GPIO_Init(GPIOA, &gpioInit);
+
+    #endif
+
+    #ifdef S0LENS_A
+
+    #endif
 
     return OV5642_INFO_OK;
 }
@@ -101,6 +109,7 @@ ov5642_status_t ov5642_dmaInit() {
 ov5642_status_t ov5642_dcmiInit() {
     GPIO_InitTypeDef gpioInit;
 
+    #ifdef STM32F429I_DISCOVERY
     /**********************************
      * DCMI     | Pin
      * --------------------------------
@@ -180,6 +189,12 @@ ov5642_status_t ov5642_dcmiInit() {
 
     GPIO_Init(GPIOD, &gpioInit); 
 
+    #endif
+
+    #ifdef S0LENS_A
+
+    #endif
+    
     // Initialize DCMI
     DCMI_InitTypeDef dcmiInit;
 
@@ -219,6 +234,8 @@ ov5642_status_t ov5642_i2cInit() {
     GPIO_InitTypeDef gpioInit;
     I2C_InitTypeDef i2cInit;
 
+    #ifdef STM32F429I_DISCOVERY
+
     // Enable I2C clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, ENABLE);
 
@@ -240,6 +257,12 @@ ov5642_status_t ov5642_i2cInit() {
     gpioInit.GPIO_OType = GPIO_OType_OD;    // Open Drain for i2c
     gpioInit.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(GPIOB, &gpioInit);
+
+    #endif
+
+    #ifdef S0LENS_A
+
+    #endif
 
     // Initialize I2C configuration
     i2cInit.I2C_Mode = I2C_Mode_I2C;
